@@ -1,13 +1,13 @@
 const Campaign = require('../models/Campaign');
-const loadUser = require('../middleware/loadUser');
+const loadAccount = require('../middleware/loadAccount');
 const transformCampaign = require('../transformers/transformCampaign');
-const { SUPER_ADMIN_ROLE } = require('../utils/userRoles');
+const { SUPER_ADMIN_ROLE } = require('../utils/accountRoles');
 
 const PAGE_SIZE = 50;
 
 module.exports = () => {
   async function handler(req, res) {
-    const { db, query, user } = req;
+    const { db, query, account } = req;
 
     let skip = 0;
     let sort = Campaign(db).SORT_CAMPAIGNS_ALPHABETICAL;
@@ -39,8 +39,8 @@ module.exports = () => {
 
     if (
       !isNaN(parseInt(query.public, 10))
-      && user
-      && user.role === SUPER_ADMIN_ROLE
+      && account
+      && account.role === SUPER_ADMIN_ROLE
     ) {
       isPublic = Boolean(parseInt(query.public));
     }
@@ -65,9 +65,9 @@ module.exports = () => {
         page: (skip / PAGE_SIZE) + 1,
         count: data.length,
       },
-      data: data.map((campaign) => transformCampaign(campaign, user)),
+      data: data.map((campaign) => transformCampaign(campaign, account)),
     });
   }
 
-  return ['get', '/campaigns', handler, [loadUser]];
+  return ['get', '/campaigns', handler, [loadAccount]];
 };

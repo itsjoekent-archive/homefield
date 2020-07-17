@@ -1,11 +1,11 @@
 const Campaign = require('../models/Campaign');
-const loadUser = require('../middleware/loadUser');
+const loadAccount = require('../middleware/loadAccount');
 const superAdminOnly = require('../middleware/superAdminOnly');
 const transformCampaign = require('../transformers/transformCampaign');
 
 module.exports = () => {
   async function handler(req, res) {
-    const { body, db, user } = req;
+    const { body, db, account } = req;
 
     const {
       name,
@@ -43,9 +43,9 @@ module.exports = () => {
     // TODO: Create an invitation for the adminEmail
 
     res.json({
-      data: transformCampaign(result, user),
+      data: transformCampaign(result, account),
     });
   }
 
-  return ['post', '/campaigns', handler, [loadUser, superAdminOnly]];
+  return ['post', '/campaigns', handler, [loadAccount, superAdminOnly]];
 };

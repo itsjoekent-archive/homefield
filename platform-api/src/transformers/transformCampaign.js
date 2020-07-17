@@ -1,4 +1,11 @@
-module.exports = function transformCampaign(campaign, user) {
+/**
+ * Return campaign properties based on API permissions.
+ *
+ * @param {Campaign} campaign
+ * @param {Account} authorizer
+ * @return {Object}
+ */
+module.exports = function transformCampaign(campaign, authorizer) {
   const {
     _id,
     name,
@@ -32,7 +39,7 @@ module.exports = function transformCampaign(campaign, user) {
     updatedAt,
   };
 
-  if (!user) {
+  if (!authorizer) {
     return base;
   }
 

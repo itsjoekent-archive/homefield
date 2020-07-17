@@ -1,10 +1,10 @@
 const Campaign = require('../models/Campaign');
-const loadUser = require('../middleware/loadUser');
+const loadAccount = require('../middleware/loadAccount');
 const transformCampaign = require('../transformers/transformCampaign');
 
 module.exports = () => {
   async function handler(req, res) {
-    const { db, params, user } = req;
+    const { db, params, account } = req;
     const { campaignId } = params;
 
     const result = await Campaign(db).getCampaignById(campaignId);
@@ -14,9 +14,9 @@ module.exports = () => {
     }
 
     res.json({
-      data: transformCampaign(result, user),
+      data: transformCampaign(result, account),
     });
   }
 
-  return ['get', '/campaigns/:campaignId', handler, [loadUser]];
+  return ['get', '/campaigns/:campaignId', handler, [loadAccount]];
 };

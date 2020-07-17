@@ -1,3 +1,4 @@
 module.exports = {
   SUPER_ADMIN_ROLE: 'SUPER_ADMIN_ROLE',
+  DEFAULT_USER_ROLE: 'DEFAULT_USER_ROLE',
 };

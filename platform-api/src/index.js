@@ -19,7 +19,9 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
     const db = client.db();
 
     await Promise.all([
+      require('./models/Account')(db).init(),
       require('./models/Campaign')(db).init(),
+      require('./models/Token')(db).init(),
     ]);
 
     const router = express.Router();
@@ -36,6 +38,8 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
       require('./routes/get-campaigns-by-id'),
       require('./routes/create-campaign'),
       require('./routes/delete-campaign'),
+
+      require('./routes/create-account'),
     ].forEach((route) => {
       const [method, path, handler, middleware] = route(router);
 

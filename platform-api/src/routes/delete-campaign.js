@@ -1,10 +1,10 @@
 const Campaign = require('../models/Campaign');
-const loadUser = require('../middleware/loadUser');
+const loadAccount = require('../middleware/loadAccount');
 const superAdminOnly = require('../middleware/superAdminOnly');
 
 module.exports = () => {
   async function handler(req, res) {
-    const { db, params, user } = req;
+    const { db, params } = req;
     const { campaignId } = params;
 
     const reuslt = await Campaign(db).deleteCampaign(campaignId);
@@ -16,5 +16,5 @@ module.exports = () => {
     res.json({ ok: true });
   }
 
-  return ['delete', '/campaigns/:campaignId', handler, [loadUser, superAdminOnly]];
+  return ['delete', '/campaigns/:campaignId', handler, [loadAccount, superAdminOnly]];
 };

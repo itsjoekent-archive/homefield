@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const PaginatedResponse = require('../utils/PaginatedResponse');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 const endProcessOnFail = require('../utils/endProcessOnFail');
+const { DEFAULT_USER_ROLE } = require('../utils/accountRoles');
 
 /**
  * Fields
@@ -18,6 +19,7 @@ const endProcessOnFail = require('../utils/endProcessOnFail');
  * @param {String} twitterUrl Twitter account that belongs to this account holder
  * @param {Array<String>} campaigns List of campaigns this account is volunteering for
  * @param {Boolean} isBanned Flag indicting if this account has been banned
+ * @param {String} role Platform account role
  * @param {Date} createdAt Time this account was created
  * @param {Date} updatedAt Time this acount was last updated at
  */
@@ -84,6 +86,7 @@ module.exports = function Account(db) {
       twitterUrl: null,
       campaigns: [],
       isBanned: false,
+      role: DEFAULT_USER_ROLE,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
