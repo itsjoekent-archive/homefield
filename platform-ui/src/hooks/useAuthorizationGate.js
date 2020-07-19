@@ -1,45 +1,66 @@
+import React from 'react';
+import { useLocation, useNavigate } from '@reach/router';
+import { useApplicationContext } from 'ApplicationContext';
+import { LOGIN_ROUTE } from 'routes';
+
 export default function useAuthorizationGate() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [hasVerifiedToken, setHasVerifiedToken] = React.useState(false);
 
   const { dispatch, authentication } = useApplicationContext();
   const hasValidAuth = !!authentication.token && !!authentication.account;
 
   React.useEffect(() => {
-    let cancel = false;
     const cachedToken = localStorage.getItem('token');
 
-    if (!hasValidAuth && cachedToken && !hasVerifiedToken) {
-      // TODO: Verify cached token
-
-      setHasVerifiedToken(true);
-
-      dispatch((state) => ({
-        ...state,
-        authentication: {
-          ...state.authentication,
-          token: cachedToken,
+    async function validateAuth() {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/v1/token/verify`, {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cachedToken}`,
         },
-      }));
+      });
 
-      // TODO: Redirect to login page if authorization fails
+      const json = await response.json();
+
+      if (json.error || response.status !== 200) {
+        throw new Error(json.error || 'Failed to verify token');
+      }
+
+      return json.data;
     }
 
-    return () => cancel = true;
-  }, [
-    hasValidAuth,
-    dispatch,
-    hasVerifiedToken,
-    setHasVerifiedToken,
-  ]);
+    if (!hasValidAuth && cachedToken && !hasVerifiedToken) {
+      validateAuth()
+        .then(({ token, account }) => {
+          setHasVerifiedToken(true);
+
+          dispatch((state) => ({
+            ...state,
+            authentication: {
+              ...state.authentication,
+              token,
+              account,
+            },
+          }));
+        })
+        .catch((error) => {
+          console.error(error);
+
+          localStorage.removeItem('token');
+          navigate(LOGIN_ROUTE);
+        });
+    }
+  }, []);
 
   React.useEffect(() => {
     const cachedToken = localStorage.getItem('token');
 
-    // TODO: Check if this is the login page
     if (!hasValidAuth && !cachedToken) {
-      // TODO: Redirect to login page
+      navigate(LOGIN_ROUTE);
     }
-  }, [
-    hasValidAuth,
-  ]);
+  }, []);
 }

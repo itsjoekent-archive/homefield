@@ -122,7 +122,9 @@ export default function FormController(props) {
   }, []);
 
   React.useEffect(() => {
-    if (state.hasSubmitted && !!asyncOnSubmit) {
+    if (state.hasSubmitted && !!asyncOnSubmit && !state.isSubmissionPending) {
+      dispatch(internalModification((copy) => ({ ...copy, isSubmissionPending: true })));
+      
       asyncOnSubmit(state)
         .then((update) => {
           if (!isMounted.current) {
@@ -164,6 +166,7 @@ export default function FormController(props) {
       dispatch(internalModification((state) => ({
         ...state,
         hasSubmittedOnce: true,
+        formError: false,
       })));
     }
 
@@ -171,7 +174,6 @@ export default function FormController(props) {
       dispatch(internalModification((state) => ({
         ...state,
         hasSubmitted: true,
-        isSubmissionPending: !!asyncOnSubmit,
       })));
 
       if (!asyncOnSubmit && !!onSubmit) {

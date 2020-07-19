@@ -2,7 +2,7 @@ const Token = require('../models/Token');
 const Account = require('../models/Account');
 
 module.exports = async function loadAccount(req, res, next) {
-  const authorization = req.headers['Authorization'];
+  const authorization = req.headers['authorization'];
   req.account = null;
 
   if (authorization) {
@@ -16,6 +16,8 @@ module.exports = async function loadAccount(req, res, next) {
     }
 
     if (token) {
+      req.token = token;
+
       const account = await Account(db).getAccountById(token.account);
 
       if (account instanceof Error) {

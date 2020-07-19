@@ -42,6 +42,7 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
 
       require('./routes/create-account'),
       require('./routes/login'),
+      require('./routes/token-verify'),
     ].forEach((route) => {
       const [method, path, handler, middleware] = route(router);
 
