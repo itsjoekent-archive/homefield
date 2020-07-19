@@ -73,3 +73,26 @@ export const LightBlueButton = styled(Button)`
 
   ${({ loading }) => loading === 'true' && disabledStyles}
 `;
+
+export const BoldTextButton = styled.span`
+  margin-top: 8px;
+  margin-bottom: 8px;
+
+  a {
+    display: block;
+    width: fit-content;
+
+    color: ${({ theme }) => theme.colors.mono.white};
+
+    font-family: ${({ theme }) => theme.font};
+    font-size: ${({ theme }) => theme.type.size.button};
+    font-weight: ${({ theme }) => theme.type.weight.button};
+    text-decoration: none;
+
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;

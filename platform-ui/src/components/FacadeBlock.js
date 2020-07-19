@@ -4,7 +4,7 @@ import styled from 'styled-components';
 export const NARROW_BLOCK = '400px';
 export const WIDE_BLOCK = '600px';
 
-const Block = styled.main`
+export const Block = styled.main`
   display: block;
   width: 100%;
   max-width: ${({ maxWidth }) => maxWidth};
@@ -29,7 +29,6 @@ const TitleBlock = styled.div`
 
   text-align: center;
 
-  border-bottom: 3px solid ${({ theme }) => theme.colors.blue.darkest};
   border-top-left-radius: ${({ theme }) => theme.borderRadius};
   border-top-right-radius: ${({ theme }) => theme.borderRadius};
   background-color: ${({ theme }) => theme.colors.blue.lightest};

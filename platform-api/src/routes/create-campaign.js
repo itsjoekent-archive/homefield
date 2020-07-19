@@ -43,7 +43,9 @@ module.exports = () => {
     // TODO: Create an invitation for the adminEmail
 
     res.json({
-      data: transformCampaign(result, account),
+      data: {
+        campaign: transformCampaign(result, account),
+      },
     });
   }
 

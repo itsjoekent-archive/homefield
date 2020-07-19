@@ -6,14 +6,16 @@ import FacadeBlock, { Block } from 'components/FacadeBlock';
 import FormController from 'components/forms/FormController';
 import EmailInput from 'components/forms/EmailInput';
 import PasswordInput from 'components/forms/PasswordInput';
+import TextInput from 'components/forms/TextInput';
 import SubmitButton from 'components/forms/SubmitButton';
 import FormErrorMessage from 'components/forms/FormErrorMessage';
+import requiredTextValidator from 'components/forms/requiredTextValidator';
 import { LightBlueButton, BoldTextButton } from 'components/Buttons';
 import { useApplicationContext } from 'ApplicationContext';
 import {
   DASHBOARD_ROUTE,
+  LOGIN_ROUTE,
   FORGOT_PASSWORD_ROUTE,
-  SIGNUP_ROUTE,
 } from 'routes';
 
 const Container = styled.div`
@@ -22,12 +24,12 @@ const Container = styled.div`
   }
 `;
 
-const LoginButton = styled(LightBlueButton)`
+const SignupButton = styled(LightBlueButton)`
   margin-left: auto;
   margin-right: auto;
 `;
 
-export default function LoginPage() {
+export default function SignupPage() {
   const { authentication, dispatch } = useApplicationContext();
 
   const navigate = useNavigate();
@@ -39,15 +41,16 @@ export default function LoginPage() {
     // eslint-disable-next-line
   }, []);
 
-  async function onLogin(state) {
-    const { values: { email, password } } = state;
+  async function onSignup(state) {
+    const { values: { firstName, email, password } } = state;
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/v1/login`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/v1/accounts`, {
       method: 'post',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        firstName,
         email,
         password,
       }),
@@ -82,20 +85,25 @@ export default function LoginPage() {
   return (
     <Container>
       <Facade>
-        <FacadeBlock title="Sign In To HomeField">
-          <FormController formId="login" asyncOnSubmit={onLogin}>
+        <FacadeBlock title="Create a new account">
+          <FormController formId="signup" asyncOnSubmit={onSignup}>
+            <TextInput
+              fieldId="firstName"
+              label="First name"
+              onValueChange={requiredTextValidator('firstName', 'First name')}
+            />
             <EmailInput />
             <PasswordInput />
             <SubmitButton
               renderButton={(buttonProps) => (
-                <LoginButton {...buttonProps}>Sign In</LoginButton>
+                <SignupButton {...buttonProps}>Create account</SignupButton>
               )}
             />
             <FormErrorMessage />
           </FormController>
         </FacadeBlock>
         <BoldTextButton>
-          <Link to={SIGNUP_ROUTE}>Create a new account</Link>
+          <Link to={LOGIN_ROUTE}>Log in to an existing account</Link>
         </BoldTextButton>
         <BoldTextButton>
           <Link to={FORGOT_PASSWORD_ROUTE}>Forgot Password</Link>

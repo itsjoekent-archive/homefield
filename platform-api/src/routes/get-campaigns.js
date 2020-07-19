@@ -65,7 +65,9 @@ module.exports = () => {
         page: (skip / PAGE_SIZE) + 1,
         count: data.length,
       },
-      data: data.map((campaign) => transformCampaign(campaign, account)),
+      data: {
+        campaigns: data.map((campaign) => transformCampaign(campaign, account)),
+      },
     });
   }
 

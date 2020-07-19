@@ -14,7 +14,9 @@ module.exports = () => {
     }
 
     res.json({
-      data: transformCampaign(result, account),
+      data: {
+        campaign: transformCampaign(result, account),
+      },
     });
   }
 

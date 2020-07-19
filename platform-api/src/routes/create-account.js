@@ -36,6 +36,17 @@ module.exports = () => {
       return;
     }
 
+    const existingAccount = await Account(db).getAccountByEmail(email);
+
+    if (existingAccount instanceof Error) {
+      throw existingAccount;
+    }
+
+    if (!!existingAccount) {
+      res.status(400).json({ error: 'This email is already registered to an account' });
+      return;
+    }
+
     const account = await Account(db).createAccount(email, password, firstName);
 
     if (account instanceof Error) {
@@ -49,8 +60,10 @@ module.exports = () => {
     }
 
     res.json({
-      account: transformAccount(account, account),
-      token: transformToken(token, account),
+      data: {
+        account: transformAccount(account, account),
+        token: transformToken(token, account),
+      },
     });
   }
 
