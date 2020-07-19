@@ -1,25 +1,43 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { ThemeProvider } from 'styled-components';
+import { Router } from '@reach/router';
+import ApplicationContext, { defaultApplicationContext } from './ApplicationContext';
+import theme from './theme';
+import {
+  FORGOT_PASSWORD_ROUTE,
+  LOGIN_ROUTE,
+} from './routes';
+
+const LoginPage = React.lazy(() => import('pages/LoginPage'));
+const ForgotPasswordPage = React.lazy(() => import('pages/ForgotPasswordPage'));
+const NotFoundPage = React.lazy(() => import('pages/NotFoundPage'));
 
 function App() {
+  const [state, dispatch] = React.useReducer(
+    (state, action) => action(state),
+    {
+      ...defaultApplicationContext,
+      authentication: {
+        ...defaultApplicationContext.authentication,
+        token: localStorage.getItem('token'),
+      },
+    },
+  );
+
+  const contextValue = { ...state, dispatch };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ApplicationContext.Provider value={contextValue}>
+      <ThemeProvider theme={theme}>
+        <React.Suspense fallback={null}>
+          <Router>
+            <LoginPage path={LOGIN_ROUTE} />
+            <ForgotPasswordPage path={FORGOT_PASSWORD_ROUTE} />
+            <NotFoundPage path="*" />
+          </Router>
+        </React.Suspense>
+      </ThemeProvider>
+    </ApplicationContext.Provider>
   );
 }
 

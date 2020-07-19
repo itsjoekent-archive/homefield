@@ -1,7 +1,10 @@
 const crypto = require('crypto');
 const express = require('express');
+const cors = require('cors');
 const pino = require('pino-http');
 const { MongoClient } = require('mongodb');
+
+const setupDb = require('./setupDb');
 const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
 
 (async function() {
@@ -11,22 +14,20 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
     const app = express();
     const logger = pino();
 
+    app.use(cors());
+
     const client = await MongoClient.connect(MONGODB_URL, {
       useUnifiedTopology: true,
       useNewUrlParser: true,
     });
 
     const db = client.db();
-
-    await Promise.all([
-      require('./models/Account')(db).init(),
-      require('./models/Campaign')(db).init(),
-      require('./models/Token')(db).init(),
-    ]);
+    await setupDb(db);
 
     const router = express.Router();
 
     router.use(logger);
+    router.use(express.json());
 
     router.use((req, res, next) => {
       req.db = db;
@@ -40,6 +41,7 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
       require('./routes/delete-campaign'),
 
       require('./routes/create-account'),
+      require('./routes/login'),
     ].forEach((route) => {
       const [method, path, handler, middleware] = route(router);
 

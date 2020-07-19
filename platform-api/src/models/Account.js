@@ -74,7 +74,7 @@ module.exports = function Account(db) {
    * @return {Promise<Account|Error>}
    */
   async function createAccount(email, password, firstName) {
-    const hashedPassword = await bcrypt(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const data = {
       email,
@@ -108,11 +108,26 @@ module.exports = function Account(db) {
     return true;
   }
 
+  /**
+   * Compare if the password matches the hashed bcrypt password
+   * on the given account.
+   *
+   * @param {Account} account
+   * @param {String} password
+   * @param {Promise<Boolean|Error}
+   */
+  async function comparePassword(account, password) {
+    const comparison = await bcrypt.compare(password, account.password);
+
+    return comparison;
+  }
+
   return {
     init: wrapAsyncFunction(init, endProcessOnFail),
     getAccountById: wrapAsyncFunction(getAccountById),
     getAccountByEmail: wrapAsyncFunction(getAccountByEmail),
     createAccount: wrapAsyncFunction(createAccount),
     deleteAccount: wrapAsyncFunction(deleteAccount),
+    comparePassword: wrapAsyncFunction(comparePassword),
   }
 }
