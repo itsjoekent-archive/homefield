@@ -175,7 +175,7 @@ export default function CampaignSelector() {
           return;
         }
 
-        if (response.status === 200) {
+        if (response.status === 200 && json.data.campaigns.length) {
           setAccountCampaigns(json.data.campaigns);
           return;
         }
