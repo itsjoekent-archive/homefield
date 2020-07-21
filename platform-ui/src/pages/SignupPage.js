@@ -11,6 +11,7 @@ import SubmitButton from 'components/forms/SubmitButton';
 import FormErrorMessage from 'components/forms/FormErrorMessage';
 import requiredTextValidator from 'components/forms/requiredTextValidator';
 import { LightBlueButton, BoldTextButton } from 'components/Buttons';
+import useApiFetch from 'hooks/useApiFetch';
 import { useApplicationContext } from 'ApplicationContext';
 import {
   DASHBOARD_ROUTE,
@@ -32,6 +33,7 @@ const SignupButton = styled(LightBlueButton)`
 export default function SignupPage() {
   const { authentication, dispatch } = useApplicationContext();
 
+  const apiFetch = useApiFetch(false);
   const navigate = useNavigate();
 
   React.useEffect(() => {
@@ -44,11 +46,8 @@ export default function SignupPage() {
   async function onSignup(state) {
     const { values: { firstName, email, password } } = state;
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/v1/accounts`, {
+    const response = await apiFetch('/v1/accounts', {
       method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({
         firstName,
         email,

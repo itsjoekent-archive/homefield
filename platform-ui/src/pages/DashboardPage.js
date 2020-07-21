@@ -1,6 +1,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
+import useApiFetch from 'hooks/useApiFetch';
 import { useApplicationContext } from 'ApplicationContext';
 import OnboardingFlow from 'components/onboarding/OnboardingFlow';
 import CampaignSelector from 'components/dashboard/CampaignSelector';
@@ -116,6 +117,8 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = React.useState(PHONEBANK);
 
+  const apiFetch = useApiFetch();
+
   const tabs = [
     [PHONEBANK, 'Phonebank'],
     [SMS, 'Send Texts'],
@@ -127,7 +130,7 @@ export default function DashboardPage() {
     && !!account.campaigns.length;
 
   function fetchCampaignAndMakeActive(id) {
-    fetch(`${process.env.REACT_APP_API_URL}/v1/campaigns/${id}`)
+    apiFetch(`/v1/campaigns/${id}`)
       .then(async (response) => {
         const json = await response.json();
 

@@ -12,6 +12,7 @@ import {
   CampaignContainer,
 } from 'components/CampaignStyledComponents';
 import { ValidationErrorMessage } from 'components/forms/CommonFormStyledComponents';
+import useApiFetch from 'hooks/useApiFetch';
 
 const OnboardingFlowLayout = styled.div`
   ${FacadeLayout} {
@@ -51,35 +52,40 @@ export default function OnboardingFlow() {
   const [formError, setFormError] = React.useState(null);
 
   const { authentication: { token }, dispatch } = useApplicationContext();
+  const apiFetch = useApiFetch();
 
   React.useEffect(() => {
     let cancel = false;
 
+    async function getCampaigns() {
+      try {
+        const response = await apiFetch('/v1/campaigns');
+        const json = await response.json();
+
+        if (cancel) {
+          return;
+        }
+
+        if (response.status === 200) {
+          const { data: { campaigns } } = json;
+          setCampaigns(campaigns);
+          return;
+        }
+
+        throw new Error(json.error || 'Encountered unexpected error retrieving campaign list. Try refreshing?');
+      } catch (error) {
+        console.error(error);
+        setFormError('Encountered unexpected error. Try again?');
+      }
+    }
+
     if (!campaigns.length) {
-      fetch(`${process.env.REACT_APP_API_URL}/v1/campaigns`)
-        .then(async (response) => {
-          const json = await response.json();
-
-          if (cancel) {
-            return;
-          }
-
-          if (response.status === 200) {
-            const { data: { campaigns } } = json;
-            setCampaigns(campaigns);
-            return;
-          }
-
-          setFormError(json.error || 'Encountered unexpected error retrieving campaign list. Try refreshing?');
-        })
-        .catch((error) => {
-          console.error(error);
-          setFormError('Encountered unexpected error. Try again?');
-        })
+      getCampaigns();
     }
 
     return () => cancel = true;
   }, [
+    apiFetch,
     campaigns,
     setCampaigns,
   ]);
@@ -87,11 +93,8 @@ export default function OnboardingFlow() {
   React.useEffect(() => {
     async function signup() {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/v1/campaigns/${targetCampaign.id}/volunteer`, {
+        const response = await apiFetch(`/v1/campaigns/${targetCampaign.id}/volunteer`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
         });
 
         const json = await response.json();
@@ -122,6 +125,7 @@ export default function OnboardingFlow() {
       signup();
     }
   }, [
+    apiFetch,
     dispatch,
     token,
     targetCampaign,

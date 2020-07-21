@@ -9,6 +9,7 @@ import PasswordInput from 'components/forms/PasswordInput';
 import SubmitButton from 'components/forms/SubmitButton';
 import FormErrorMessage from 'components/forms/FormErrorMessage';
 import { LightBlueButton, BoldTextButton } from 'components/Buttons';
+import useApiFetch from 'hooks/useApiFetch';
 import { useApplicationContext } from 'ApplicationContext';
 import {
   DASHBOARD_ROUTE,
@@ -30,6 +31,7 @@ const LoginButton = styled(LightBlueButton)`
 export default function LoginPage() {
   const { authentication, dispatch } = useApplicationContext();
 
+  const apiFetch = useApiFetch(false);
   const navigate = useNavigate();
 
   React.useEffect(() => {
@@ -42,11 +44,8 @@ export default function LoginPage() {
   async function onLogin(state) {
     const { values: { email, password } } = state;
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/v1/login`, {
+    const response = await apiFetch('/v1/login', {
       method: 'post',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({
         email,
         password,
