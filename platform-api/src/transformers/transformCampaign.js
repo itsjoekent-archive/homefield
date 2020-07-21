@@ -43,5 +43,5 @@ module.exports = function transformCampaign(campaign, authorizer) {
     return base;
   }
 
-  return campaign;
+  return base;
 }

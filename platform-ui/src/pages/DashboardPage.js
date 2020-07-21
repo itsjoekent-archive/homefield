@@ -21,8 +21,9 @@ const NavContainer = styled.nav`
   flex-direction: column;
 
   background-color: ${({ theme }) => theme.colors.mono[200]};
+  border-bottom: 2px solid ${({ theme }) => theme.colors.mono[400]};
 
-  border-bottom: 2px solid ${({ theme }) => theme.colors.mono[500]};
+  margin-top: 12px;
 `;
 
 const Row = styled.div`

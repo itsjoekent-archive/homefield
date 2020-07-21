@@ -80,6 +80,8 @@ module.exports = (db) => {
   }
 
   return {
+    collection,
+    
     init: wrapAsyncFunction(init, endProcessOnFail),
     createToken: wrapAsyncFunction(createToken),
     findTokenByBearer: wrapAsyncFunction(findTokenByBearer),

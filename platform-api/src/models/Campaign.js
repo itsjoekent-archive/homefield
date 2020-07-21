@@ -163,6 +163,8 @@ module.exports = function(db) {
     SORT_CAMPAIGNS_NEWEST,
     SORT_CAMPAIGNS_OLDEST,
 
+    collection,
+
     init: wrapAsyncFunction(init, endProcessOnFail),
     getCampaignById: wrapAsyncFunction(getCampaignById),
     getPaginatedCampaigns: wrapAsyncFunction(getPaginatedCampaigns),

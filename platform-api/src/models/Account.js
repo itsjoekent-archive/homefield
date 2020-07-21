@@ -124,6 +124,7 @@ module.exports = function Account(db) {
 
   return {
     collection,
+    
     init: wrapAsyncFunction(init, endProcessOnFail),
     getAccountById: wrapAsyncFunction(getAccountById),
     getAccountByEmail: wrapAsyncFunction(getAccountByEmail),

@@ -41,6 +41,7 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
       require('./routes/delete-campaign'),
 
       require('./routes/volunteer'),
+      require('./routes/get-account-campaigns'),
 
       require('./routes/create-account'),
       require('./routes/login'),
