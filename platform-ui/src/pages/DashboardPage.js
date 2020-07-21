@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
 import { useApplicationContext } from 'ApplicationContext';
 import OnboardingFlow from 'components/onboarding/OnboardingFlow';
@@ -23,7 +23,7 @@ const NavContainer = styled.nav`
   background-color: ${({ theme }) => theme.colors.mono[200]};
   border-bottom: 2px solid ${({ theme }) => theme.colors.mono[400]};
 
-  margin-top: 12px;
+  padding-top: 12px;
 `;
 
 const Row = styled.div`
@@ -52,6 +52,31 @@ const NavTabRow = styled.div`
   flex-direction: row;
 `;
 
+const Tab = styled.a`
+  font-family: ${({ theme }) => theme.font};
+  font-size: ${({ theme }) => theme.type.size.paragraph};
+  font-weight: ${({ theme }) => theme.type.weight.paragraph};
+  text-align: left;
+  color: ${({ theme }) => theme.colors.mono[800]};
+
+  padding-bottom: 4px;
+  margin-right: 24px;
+
+  cursor: pointer;
+  user-select: none;
+
+  border-bottom: 4px solid ${({ theme }) => theme.colors.mono.white};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.blue.dark};
+  }
+
+  ${({ selected }) => selected && css`
+    color: ${({ theme }) => theme.colors.blue.base};
+    border-bottom: 4px solid ${({ theme }) => theme.colors.blue.base};
+  `}
+`;
+
 const MainContainer = styled.main`
   display: flex;
   flex-direction: column;
@@ -62,6 +87,24 @@ const MainContainer = styled.main`
   background-color: ${({ theme }) => theme.colors.white};
 `;
 
+const Frame = styled.iframe`
+  width: 100%;
+  min-height: 80vh;
+
+  border: none;
+
+  ${({ src }) => !src && css`
+    background: linear-gradient(to right, #000 33%, #fff 0%) top/10px 1px repeat-x,
+                linear-gradient(#000 33%, #fff 0%) right/1px 10px repeat-y,
+                linear-gradient(to right, #000 33%, #fff 0%) bottom/10px 1px repeat-x,
+                linear-gradient(#000 33%, #fff 0%) left/1px 10px repeat-y;
+  `}
+`;
+
+const PHONEBANK = 'PHONEBANK';
+const SMS = 'SMS';
+const RESOURCES = 'RESOURCES';
+
 export default function DashboardPage() {
   useAuthorizationGate();
 
@@ -70,6 +113,14 @@ export default function DashboardPage() {
     authentication: { account },
     dispatch,
   } = useApplicationContext();
+
+  const [activeTab, setActiveTab] = React.useState(PHONEBANK);
+
+  const tabs = [
+    [PHONEBANK, 'Phonebank'],
+    [SMS, 'Send Texts'],
+    [RESOURCES, 'Volunteer Resources'],
+  ];
 
   const accountHasCampaigns = account
     && account.campaigns
@@ -119,13 +170,26 @@ export default function DashboardPage() {
         </Row>
         <Row>
           <NavTabRow>
-
+            {tabs.map((tab) => (
+              <Tab
+                key={tab[0]}
+                selected={tab[0] === activeTab}
+                onClick={() => setActiveTab(tab[0])}
+              >
+                {tab[1]}
+              </Tab>
+            ))}
           </NavTabRow>
         </Row>
       </NavContainer>
       <MainContainer>
         <Row>
-
+          {activeTab === PHONEBANK && (
+            <Frame src={activeCampaign && activeCampaign.dialer.iframe} />
+          )}
+          {activeTab === SMS && (
+            <Frame src={activeCampaign && activeCampaign.sms.iframe} />
+          )}
         </Row>
       </MainContainer>
     </PageContainer>

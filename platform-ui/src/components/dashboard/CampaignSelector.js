@@ -36,6 +36,8 @@ const CampaignRow = styled.button`
 `;
 
 const SelectedCampaignRow = styled(CampaignRow)`
+  width: 100%;
+
   padding-right: 24px;
   border-radius: ${({ theme }) => theme.borderRadius};
 
@@ -249,6 +251,8 @@ export default function CampaignSelector() {
         setTargetCampaign(null);
 
         if (response.status === 200) {
+          localStorage.setItem('lastActiveCampaignId', json.data.campaign.id);
+
           dispatch((state) => ({
             ...state,
             activeCampaign: json.data.campaign,
@@ -286,6 +290,8 @@ export default function CampaignSelector() {
   ]);
 
   function onSwitchCampaign(toCampaign) {
+    localStorage.setItem('lastActiveCampaignId', toCampaign.id);
+
     setIsOpen(false);
     dispatch((state) => ({ ...state, activeCampaign: toCampaign }));
   }
