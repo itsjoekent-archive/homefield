@@ -4,7 +4,9 @@
     "start:dev": "nodemon src/index.js | pino-pretty"
   },
   "dependencies": {
+    "@emeraldpay/hashicon": "^0.4.0",
     "bcrypt": "^5.0.0",
+    "canvas": "^2.6.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "mongodb": "^3.5.9",

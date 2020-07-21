@@ -1,5 +1,8 @@
-const { ObjectID } = require('mongodb');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const { ObjectID } = require('mongodb');
+const { createCanvas } = require('canvas');
+const { hashicon } = require('@emeraldpay/hashicon');
 
 const PaginatedResponse = require('../utils/PaginatedResponse');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
@@ -76,13 +79,16 @@ module.exports = function Account(db) {
   async function createAccount(email, password, firstName) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const avatarHash = crypto.createHash('md5').update(email).digest('hex');
+    const avatarUrl = hashicon(avatarHash, { createCanvas, size: 128 }).toDataURL();
+
     const data = {
       email,
       password: hashedPassword,
       lastAuthenticationUpdate: Date.now(),
       firstName,
       lastName: null,
-      avatarUrl: null,
+      avatarUrl,
       twitterUrl: null,
       campaigns: [],
       isBanned: false,
@@ -124,7 +130,7 @@ module.exports = function Account(db) {
 
   return {
     collection,
-    
+
     init: wrapAsyncFunction(init, endProcessOnFail),
     getAccountById: wrapAsyncFunction(getAccountById),
     getAccountByEmail: wrapAsyncFunction(getAccountByEmail),

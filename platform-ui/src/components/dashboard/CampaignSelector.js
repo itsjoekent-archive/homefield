@@ -28,6 +28,7 @@ const CampaignRow = styled.button`
   border: 1px solid ${({ theme }) => theme.colors.mono[300]};
 
   cursor: pointer;
+  overflow: hidden;
 
   &:active {
     border: 1px solid ${({ theme }) => theme.colors.mono[300]};
@@ -50,13 +51,12 @@ const SelectedCampaignRow = styled(CampaignRow)`
     content: '';
     position: absolute;
     display: block;
-    right: 12px;
+    right: 8px;
 
     width: 0;
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-
     border-bottom: 5px solid ${({ theme }) => theme.colors.mono.black};
   }
 

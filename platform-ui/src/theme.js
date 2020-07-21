@@ -60,6 +60,9 @@ const theme = {
       paragraph: 400,
     },
   },
+  zIndex: {
+    onboarding: 100,
+  },
 };
 
 export default theme;

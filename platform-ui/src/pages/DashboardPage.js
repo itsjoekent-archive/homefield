@@ -5,6 +5,8 @@ import useApiFetch from 'hooks/useApiFetch';
 import { useApplicationContext } from 'ApplicationContext';
 import OnboardingFlow from 'components/onboarding/OnboardingFlow';
 import CampaignSelector from 'components/dashboard/CampaignSelector';
+import NavMenu from 'components/NavMenu';
+import logo from 'assets/logo-name-blue-100.png';
 
 const PageContainer = styled.div`
   display: flex;
@@ -102,6 +104,14 @@ const Frame = styled.iframe`
   `}
 `;
 
+const Logo = styled.img`
+  width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 24px;
+  margin-bottom: 24px;
+`;
+
 const PHONEBANK = 'PHONEBANK';
 const SMS = 'SMS';
 const RESOURCES = 'RESOURCES';
@@ -169,6 +179,7 @@ export default function DashboardPage() {
         <Row>
           <NavPlatformRow>
             <CampaignSelector />
+            <NavMenu />
           </NavPlatformRow>
         </Row>
         <Row>
@@ -178,6 +189,9 @@ export default function DashboardPage() {
                 key={tab[0]}
                 selected={tab[0] === activeTab}
                 onClick={() => setActiveTab(tab[0])}
+                role="button"
+                tabIndex="0"
+                onKeyDown={(event) => (event.keyCode === 32 || event.keyCode === 13) && setActiveTab(tab[0])}
               >
                 {tab[1]}
               </Tab>
@@ -195,6 +209,7 @@ export default function DashboardPage() {
           )}
         </Row>
       </MainContainer>
+      <Logo src={logo} />
     </PageContainer>
   );
 }

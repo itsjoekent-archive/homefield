@@ -21,6 +21,7 @@ const OnboardingFlowLayout = styled.div`
     left: 0;
     width: 100vw;
     height: 100vh;
+    z-index: ${({ theme }) => theme.zIndex.onboarding};
   }
 
   ${LightBlueButton} {
