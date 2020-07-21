@@ -1,11 +1,10 @@
 import React from 'react';
-import { useLocation, useNavigate } from '@reach/router';
+import { useNavigate } from '@reach/router';
 import { useApplicationContext } from 'ApplicationContext';
 import { LOGIN_ROUTE } from 'routes';
 
 export default function useAuthorizationGate() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [hasVerifiedToken, setHasVerifiedToken] = React.useState(false);
 
@@ -54,6 +53,7 @@ export default function useAuthorizationGate() {
           navigate(LOGIN_ROUTE);
         });
     }
+    // eslint-disable-next-line
   }, []);
 
   React.useEffect(() => {
@@ -62,5 +62,6 @@ export default function useAuthorizationGate() {
     if (!hasValidAuth && !cachedToken) {
       navigate(LOGIN_ROUTE);
     }
+    // eslint-disable-next-line
   }, []);
 }

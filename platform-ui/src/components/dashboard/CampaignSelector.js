@@ -156,7 +156,6 @@ export default function CampaignSelector() {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [
-    containerRef.current,
     isOpen,
     setIsOpen,
   ]);
@@ -192,6 +191,7 @@ export default function CampaignSelector() {
 
     return () => cancel = true;
   }, [
+    apiFetch,
     account,
     accountCampaigns,
     setAccountCampaigns,
@@ -228,6 +228,7 @@ export default function CampaignSelector() {
 
     return () => cancel = true;
   }, [
+    apiFetch,
     allCampaigns,
     setAllCampaigns,
   ]);
@@ -276,10 +277,12 @@ export default function CampaignSelector() {
 
     return () => cancel = true;
   }, [
-    targetCampaign,
+    apiFetch,
+    dispatch,
     setTargetCampaign,
     setAccountCampaigns,
     setIsOpen,
+    targetCampaign,
   ]);
 
   function onSwitchCampaign(toCampaign) {

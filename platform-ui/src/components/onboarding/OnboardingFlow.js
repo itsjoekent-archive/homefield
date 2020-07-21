@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { useApplicationContext } from 'ApplicationContext';
 import Facade, { Layout as FacadeLayout } from 'components/Facade';
 import FacadeBlock from 'components/FacadeBlock';
@@ -12,7 +12,6 @@ import {
   CampaignContainer,
 } from 'components/CampaignStyledComponents';
 import { ValidationErrorMessage } from 'components/forms/CommonFormStyledComponents';
-import useIsMounted from 'hooks/useIsMounted';
 
 const OnboardingFlowLayout = styled.div`
   ${FacadeLayout} {

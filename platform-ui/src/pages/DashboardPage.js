@@ -103,6 +103,7 @@ export default function DashboardPage() {
       const id = account.campaigns[0].id;
       fetchCampaignAndMakeActive(id);
     }
+    // eslint-disable-next-line
   }, []);
 
   return (

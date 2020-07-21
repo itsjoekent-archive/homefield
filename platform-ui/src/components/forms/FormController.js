@@ -1,5 +1,4 @@
 import React from 'react';
-import useIsMounted from 'hooks/useIsMounted';
 
 const defaultFormControllerContext = {
   formId: '',
@@ -116,7 +115,11 @@ export default function FormController(props) {
     },
   );
 
-  const isMounted = useIsMounted();
+  const isMounted = React.useRef(true);
+
+  React.useEffect(() => {
+    return () => isMounted.current = false;
+  }, []);
 
   React.useEffect(() => {
     if (state.hasSubmitted && !!asyncOnSubmit && !state.isSubmissionPending) {
@@ -124,7 +127,7 @@ export default function FormController(props) {
 
       asyncOnSubmit(state)
         .then((update) => {
-          if (!isMounted) {
+          if (!isMounted.current) {
             return;
           }
 
@@ -138,7 +141,7 @@ export default function FormController(props) {
         .catch((error) => {
           console.error(error);
 
-          if (!isMounted) {
+          if (!isMounted.current) {
             return;
           }
 
