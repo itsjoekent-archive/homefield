@@ -12,7 +12,7 @@ export default function useApiFetch(authenticate = true, contentType = 'applicat
     }
 
     if (contentType) {
-      options.headers['ContentType'] = contentType;
+      options.headers['Content-Type'] = contentType;
     }
 
     if (authenticate) {

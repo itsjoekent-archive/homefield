@@ -2,8 +2,10 @@ import React from 'react';
 import { useNavigate } from '@reach/router';
 import { useApplicationContext } from 'ApplicationContext';
 import { LOGIN_ROUTE } from 'routes';
+import useApiFetch from 'hooks/useApiFetch';
 
 export default function useAuthorizationGate() {
+  const apiFetch = useApiFetch(false);
   const navigate = useNavigate();
 
   const [hasVerifiedToken, setHasVerifiedToken] = React.useState(false);
@@ -15,10 +17,9 @@ export default function useAuthorizationGate() {
     const cachedToken = localStorage.getItem('token');
 
     async function validateAuth() {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/v1/token/verify`, {
+      const response = await apiFetch('/v1/token/verify', {
         method: 'post',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${cachedToken}`,
         },
       });
