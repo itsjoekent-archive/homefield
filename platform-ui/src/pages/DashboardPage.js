@@ -106,7 +106,7 @@ export default function DashboardPage() {
 
   return (
     <PageContainer>
-      {!accountHasCampaigns && (
+      {!!account && !accountHasCampaigns && (
         <OnboardingFlow />
       )}
       <NavContainer>
