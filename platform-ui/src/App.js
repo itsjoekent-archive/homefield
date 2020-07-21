@@ -19,13 +19,7 @@ const SignupPage = React.lazy(() => import('pages/SignupPage'));
 function App() {
   const [state, dispatch] = React.useReducer(
     (state, action) => action(state),
-    {
-      ...defaultApplicationContext,
-      authentication: {
-        ...defaultApplicationContext.authentication,
-        token: localStorage.getItem('token'),
-      },
-    },
+    defaultApplicationContext,
   );
 
   const contextValue = { ...state, dispatch };

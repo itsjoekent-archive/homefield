@@ -40,6 +40,8 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
       require('./routes/create-campaign'),
       require('./routes/delete-campaign'),
 
+      require('./routes/volunteer'),
+
       require('./routes/create-account'),
       require('./routes/login'),
       require('./routes/token-verify'),
@@ -72,11 +74,6 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
     });
 
     app.use('/v1', router);
-
-    db.collection('campaigns').insertOne({
-      name: `Test ${Math.round(Math.random() * 1000)}`,
-      isPublic: true,
-    });
 
     app.listen(PORT, () => console.log(`Listening on ${PORT}`));
   } catch (error) {

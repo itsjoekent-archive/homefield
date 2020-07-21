@@ -1,4 +1,5 @@
 import React from 'react';
+import useIsMounted from 'hooks/useIsMounted';
 
 const defaultFormControllerContext = {
   formId: '',
@@ -115,19 +116,15 @@ export default function FormController(props) {
     },
   );
 
-  const isMounted = React.useRef(true);
-
-  React.useEffect(() => {
-    return () => isMounted.current = false;
-  }, []);
+  const isMounted = useIsMounted();
 
   React.useEffect(() => {
     if (state.hasSubmitted && !!asyncOnSubmit && !state.isSubmissionPending) {
       dispatch(internalModification((copy) => ({ ...copy, isSubmissionPending: true })));
-      
+
       asyncOnSubmit(state)
         .then((update) => {
-          if (!isMounted.current) {
+          if (!isMounted) {
             return;
           }
 
@@ -141,7 +138,7 @@ export default function FormController(props) {
         .catch((error) => {
           console.error(error);
 
-          if (!isMounted.current) {
+          if (!isMounted) {
             return;
           }
 

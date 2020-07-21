@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import logo from '../assets/logo-name-white-100.png';
 import invertedLogo from '../assets/logo-name-black-100.png';
 
-const Layout = styled.div`
+export const Layout = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;

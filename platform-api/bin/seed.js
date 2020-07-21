@@ -34,7 +34,50 @@ const Campaign = require('../src/models/Campaign');
     }
 
     // seed campaigns
-    // ...
+    console.log('Seeding campaigns...');
+
+    const campaigns = await Promise.all([
+      Campaign(db).createCampaign(
+        'Governor For Governor',
+        'California',
+        '/seed/campaign-gov.jpg',
+      ),
+      Campaign(db).createCampaign(
+        'Kangaroo For Senate',
+        'Florida',
+        '/seed/campaign-kangaroo.jpg',
+      ),
+      Campaign(db).createCampaign(
+        'Mr Puff Pastry For President',
+        'Michigan',
+        '/seed/campaign-mr-puff-pastry.jpg',
+      ),
+      Campaign(db).createCampaign(
+        'Mr Puff Pastry For President',
+        'Pennsylvania',
+        '/seed/campaign-mr-puff-pastry.jpg',
+      ),
+      Campaign(db).createCampaign(
+        'Penny For NY-10 ',
+        'New York, NY',
+        '/seed/campaign-penny.jpg',
+      ),
+      Campaign(db).createCampaign(
+        'Sausages For President',
+        'Ohio',
+        '/seed/campaign-sausage.jpg',
+      ),
+      Campaign(db).createCampaign(
+        'Sweeper For Manhattan DA',
+        'New York, NY',
+        '/seed/campaign-sweeper.jpg',
+      ),
+    ]);
+
+    await Promise.all(campaigns.map((campaign) => db.collection('campaigns').findOneAndUpdate(
+      { _id: campaign._id },
+      { '$set': { isPublic: true } },
+    )));
 
     console.log('Seed finished!');
     process.exit(0);

@@ -13,6 +13,11 @@ module.exports = () => {
       throw result;
     }
 
+    if (!result) {
+      res.status(404).json({ error: 'Campaign not found' });
+      return;
+    }
+
     res.json({
       data: {
         campaign: transformCampaign(result, account),

@@ -42,7 +42,7 @@ export default function useAuthorizationGate() {
             ...state,
             authentication: {
               ...state.authentication,
-              token,
+              token: token.bearer,
               account,
             },
           }));
