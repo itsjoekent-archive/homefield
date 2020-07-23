@@ -4,7 +4,7 @@ import { useApplicationContext } from 'ApplicationContext';
 import { LOGIN_ROUTE } from 'routes';
 import useApiFetch from 'hooks/useApiFetch';
 
-export default function useAuthorizationGate() {
+export default function useAuthorizationGate(redirectOnFail = true) {
   const apiFetch = useApiFetch(false);
   const navigate = useNavigate();
 
@@ -49,9 +49,13 @@ export default function useAuthorizationGate() {
         })
         .catch((error) => {
           console.error(error);
+          // TODO: Snack error
 
           localStorage.removeItem('token');
-          navigate(LOGIN_ROUTE);
+
+          if (redirectOnFail) {
+            navigate(LOGIN_ROUTE);
+          }
         });
     }
     // eslint-disable-next-line
@@ -60,7 +64,7 @@ export default function useAuthorizationGate() {
   React.useEffect(() => {
     const cachedToken = localStorage.getItem('token');
 
-    if (!hasValidAuth && !cachedToken) {
+    if (!hasValidAuth && !cachedToken && redirectOnFail) {
       navigate(LOGIN_ROUTE);
     }
     // eslint-disable-next-line

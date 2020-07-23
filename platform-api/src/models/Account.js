@@ -1,10 +1,8 @@
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const { ObjectID } = require('mongodb');
 const { createCanvas } = require('canvas');
 const { hashicon } = require('@emeraldpay/hashicon');
 
-const PaginatedResponse = require('../utils/PaginatedResponse');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 const endProcessOnFail = require('../utils/endProcessOnFail');
 const { DEFAULT_USER_ROLE } = require('../utils/accountRoles');
@@ -16,6 +14,7 @@ const { DEFAULT_USER_ROLE } = require('../utils/accountRoles');
  * @param {String} email Account email
  * @param {String} password Password hash (bcrypt)
  * @param {Date} lastAuthenticationUpdate Marker for comparing token validity
+ * @param {String} username Account username
  * @param {String} firstName Account first name
  * @param {String} lastName Account last name
  * @param {String} avatarUrl Account avatar image url
@@ -29,7 +28,7 @@ const { DEFAULT_USER_ROLE } = require('../utils/accountRoles');
 
 /**
  * Unique Indexes
- * _id, email
+ * _id, email, username
  */
 
 module.exports = function Account(db) {
@@ -42,16 +41,17 @@ module.exports = function Account(db) {
    */
   async function init() {
     await collection.createIndex({ email: 1 }, { unique: true });
+    await collection.createIndex({ username: 1 }, { unique: true });
   }
 
   /**
    * Get an account by its ID.
    *
-   * @param {String} id Account id
+   * @param {ObjectID} _id Account id
    * @return {Promise<Account|Error>}
    */
-  async function getAccountById(id) {
-    const account = await collection.findOne({ _id: ObjectID(id) });
+  async function getAccountById(_id) {
+    const account = await collection.findOne({ _id });
 
     return account;
   }
@@ -63,7 +63,19 @@ module.exports = function Account(db) {
    * @return {Promise<Account|Error>}
    */
   async function getAccountByEmail(email) {
-    const account = await collection.findOne({ email });
+    const account = await collection.findOne({ email: email.toLowerCase().trim() });
+
+    return account;
+  }
+
+  /**
+   * Get an account by its username.
+   *
+   * @param {String} username
+   * @return {Promise<Account|Error>}
+   */
+  async function getAccountByUsername(username) {
+    const account = await collection.findOne({ username });
 
     return account;
   }
@@ -82,10 +94,14 @@ module.exports = function Account(db) {
     const avatarHash = crypto.createHash('md5').update(email).digest('hex');
     const avatarUrl = hashicon(avatarHash, { createCanvas, size: 128 }).toDataURL();
 
+    const createdAt = Date.now();
+    const username = encodeURIComponent(`${firstName.replace(/ /g, '')}-${createdAt.toString().slice(Math.round(createdAt.toString().length / 2))}`.toLowerCase());
+
     const data = {
-      email,
+      email: email.toLowerCase().trim(),
       password: hashedPassword,
       lastAuthenticationUpdate: Date.now(),
+      username,
       firstName,
       lastName: null,
       avatarUrl,
@@ -93,8 +109,8 @@ module.exports = function Account(db) {
       campaigns: [],
       isBanned: false,
       role: DEFAULT_USER_ROLE,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: createdAt,
+      updatedAt: createdAt,
     };
 
     const result = await collection.insertOne(data);
@@ -105,11 +121,11 @@ module.exports = function Account(db) {
   /**
    * Delete an account.
    *
-   * @param {String} id Account ID
+   * @param {ObjectID} id Account ID
    * @return {Promise<Boolean|Error>}
    */
-  async function deleteAccount(id) {
-    await collection.removeOne({ _id: ObjectID(id) });
+  async function deleteAccount(_id) {
+    await collection.removeOne({ _id });
 
     return true;
   }
@@ -134,6 +150,7 @@ module.exports = function Account(db) {
     init: wrapAsyncFunction(init, endProcessOnFail),
     getAccountById: wrapAsyncFunction(getAccountById),
     getAccountByEmail: wrapAsyncFunction(getAccountByEmail),
+    getAccountByUsername: wrapAsyncFunction(getAccountByUsername),
     createAccount: wrapAsyncFunction(createAccount),
     deleteAccount: wrapAsyncFunction(deleteAccount),
     comparePassword: wrapAsyncFunction(comparePassword),

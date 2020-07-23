@@ -1,5 +1,5 @@
-const { promisify } = require('util');
 const crypto = require('crypto');
+const { promisify } = require('util');
 const ms = require('ms');
 
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
@@ -12,7 +12,7 @@ const randomBytes = promisify(crypto.randomBytes);
  *
  * @param {ObjectID} _id Unique identifier
  * @param {String} bearer Bearer token
- * @param {String} account Account ID this token relates to
+ * @param {ObjectID} account Account ID this token relates to
  * @param {Date} lauPoint Last authentication update value when this token was created
  * @param {Date} createdAt Time this token was created
  */
@@ -48,7 +48,7 @@ module.exports = (db) => {
 
     const data = {
       bearer,
-      account: account._id.toString(),
+      account: account._id,
       lauPoint: account.lastAuthenticationUpdate,
       createdAt: Date.now(),
       expiresAt: Date.now() + ms('30 days'),
@@ -79,11 +79,24 @@ module.exports = (db) => {
     return token;
   }
 
+  /**
+   * Delete a token from the database.
+   *
+   * @param {ObjectID} _id Token id
+   * @return {Promise<Boolean|Error>}
+   */
+  async function deleteToken(_id) {
+    const deletionResult = await collection.removeOne({ _id });
+
+    return deletionResult;
+  }
+
   return {
     collection,
-    
+
     init: wrapAsyncFunction(init, endProcessOnFail),
     createToken: wrapAsyncFunction(createToken),
     findTokenByBearer: wrapAsyncFunction(findTokenByBearer),
+    deleteToken: wrapAsyncFunction(deleteToken),
   }
 }

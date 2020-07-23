@@ -6,13 +6,17 @@
  * @return {Object}
  */
 module.exports = function transformToken(token, authorizer) {
+  if (!token) {
+    return null;
+  }
+
   const {
     bearer,
     account,
     expiresAt,
   } = token;
 
-  if (!authorizer || authorizer._id.toString() !== account) {
+  if (!authorizer || authorizer._id.toString() !== account.toString()) {
     return null;
   }
 

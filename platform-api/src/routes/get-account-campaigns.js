@@ -15,9 +15,7 @@ module.exports = () => {
     }
 
     const campaigns = await Campaign(db).collection.find({
-      _id: {
-        '$in': account.campaigns.map((campaignId) => ObjectID(campaignId)),
-      },
+      _id: { '$in': account.campaigns },
     }).toArray();
 
     if (campaigns instanceof Error) {

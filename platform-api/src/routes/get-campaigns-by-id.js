@@ -1,3 +1,5 @@
+const { ObjectID } = require('mongodb');
+
 const Campaign = require('../models/Campaign');
 const loadAccount = require('../middleware/loadAccount');
 const transformCampaign = require('../transformers/transformCampaign');
@@ -7,7 +9,7 @@ module.exports = () => {
     const { db, params, account } = req;
     const { campaignId } = params;
 
-    const result = await Campaign(db).getCampaignById(campaignId);
+    const result = await Campaign(db).getCampaignById(ObjectID(campaignId));
 
     if (result instanceof Error) {
       throw result;

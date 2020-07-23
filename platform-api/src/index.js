@@ -40,11 +40,17 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
       require('./routes/create-campaign'),
       require('./routes/delete-campaign'),
 
+      require('./routes/get-campaign-activity'),
+      require('./routes/get-account-activity'),
+
       require('./routes/volunteer'),
+
       require('./routes/get-account-campaigns'),
+      require('./routes/get-account-by-id'),
 
       require('./routes/create-account'),
       require('./routes/login'),
+      require('./routes/logout'),
       require('./routes/token-verify'),
     ].forEach((route) => {
       const [method, path, handler, middleware] = route(router);

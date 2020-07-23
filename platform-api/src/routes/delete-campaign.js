@@ -1,3 +1,5 @@
+const { ObjectID } = require('mongodb');
+
 const Campaign = require('../models/Campaign');
 const loadAccount = require('../middleware/loadAccount');
 const superAdminOnly = require('../middleware/superAdminOnly');
@@ -7,7 +9,7 @@ module.exports = () => {
     const { db, params } = req;
     const { campaignId } = params;
 
-    const reuslt = await Campaign(db).deleteCampaign(campaignId);
+    const reuslt = await Campaign(db).deleteCampaign(ObjectID(campaignId));
 
     if (result instanceof Error) {
       throw result;

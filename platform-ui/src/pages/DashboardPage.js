@@ -6,6 +6,7 @@ import { useApplicationContext } from 'ApplicationContext';
 import OnboardingFlow from 'components/onboarding/OnboardingFlow';
 import CampaignSelector from 'components/dashboard/CampaignSelector';
 import NavMenu from 'components/NavMenu';
+import ActivityFeed from 'components/activity/ActivityFeed';
 import logo from 'assets/logo-name-blue-100.png';
 
 const PageContainer = styled.div`
@@ -87,7 +88,9 @@ const MainContainer = styled.main`
   padding-top: 36px;
   padding-bottom: 36px;
 
-  background-color: ${({ theme }) => theme.colors.white};
+  background-color: ${({ theme }) => theme.colors.mono.white};
+
+  border-bottom: 1px solid ${({ theme }) => theme.colors.mono[400]};
 `;
 
 const Frame = styled.iframe`
@@ -112,6 +115,7 @@ const Logo = styled.img`
   margin-bottom: 24px;
 `;
 
+const ACTIVITY = 'ACTIVITY';
 const PHONEBANK = 'PHONEBANK';
 const SMS = 'SMS';
 const RESOURCES = 'RESOURCES';
@@ -125,11 +129,12 @@ export default function DashboardPage() {
     dispatch,
   } = useApplicationContext();
 
-  const [activeTab, setActiveTab] = React.useState(PHONEBANK);
+  const [activeTab, setActiveTab] = React.useState(ACTIVITY);
 
   const apiFetch = useApiFetch();
 
   const tabs = [
+    [ACTIVITY, 'Recent Activity'],
     [PHONEBANK, 'Phonebank'],
     [SMS, 'Send Texts'],
     [RESOURCES, 'Volunteer Resources'],
@@ -139,36 +144,41 @@ export default function DashboardPage() {
     && account.campaigns
     && !!account.campaigns.length;
 
-  function fetchCampaignAndMakeActive(id) {
-    apiFetch(`/v1/campaigns/${id}`)
-      .then(async (response) => {
-        const json = await response.json();
-
-        if (response.status === 200) {
-          localStorage.setItem('lastActiveCampaignId', json.data.campaign.id);
-          dispatch((state) => ({ ...state, activeCampaign: json.data.campaign }));
-          return;
-        }
-
-        // TODO: snack error
-      })
-      .catch((error) => {
-        console.error(error);
-        // TODO: snack error
-      });
-  }
-
   React.useEffect(() => {
+    function fetchCampaignAndMakeActive(id) {
+      apiFetch(`/v1/campaigns/${id}`)
+        .then(async (response) => {
+          const json = await response.json();
+
+          if (response.status === 200) {
+            localStorage.setItem('lastActiveCampaignId', json.data.campaign.id);
+            dispatch((state) => ({ ...state, activeCampaign: json.data.campaign }));
+            return;
+          }
+
+          // TODO: snack error
+        })
+        .catch((error) => {
+          console.error(error);
+          // TODO: snack error
+        });
+    }
+
     const lastActiveCampaignId = localStorage.getItem('lastActiveCampaignId');
 
     if (!activeCampaign && lastActiveCampaignId) {
       fetchCampaignAndMakeActive(lastActiveCampaignId);
     } else if (!activeCampaign && accountHasCampaigns) {
-      const id = account.campaigns[0].id;
+      const id = account.campaigns[0];
       fetchCampaignAndMakeActive(id);
     }
-    // eslint-disable-next-line
-  }, []);
+  }, [
+    account,
+    activeCampaign,
+    accountHasCampaigns,
+    apiFetch,
+    dispatch,
+  ]);
 
   return (
     <PageContainer>
@@ -201,6 +211,9 @@ export default function DashboardPage() {
       </NavContainer>
       <MainContainer>
         <Row>
+          {activeTab === ACTIVITY && (
+            <ActivityFeed campaignId={activeCampaign && activeCampaign.id} />
+          )}
           {activeTab === PHONEBANK && (
             <Frame src={activeCampaign && activeCampaign.dialer.iframe} />
           )}

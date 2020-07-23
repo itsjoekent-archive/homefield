@@ -6,6 +6,10 @@
  * @return {Object}
  */
 module.exports = function transformCampaign(campaign, authorizer) {
+  if (!campaign) {
+    return null;
+  }
+
   const {
     _id,
     name,

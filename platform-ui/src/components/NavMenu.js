@@ -1,6 +1,10 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import { Link, useNavigate } from '@reach/router';
 import { useApplicationContext } from 'ApplicationContext';
+import { LOGIN_ROUTE, PROFILE_ROUTE } from 'routes';
+import useClickOutside from 'hooks/useClickOutside';
+import useApiFetch from 'hooks/useApiFetch';
 
 const Container = styled.button`
   display: flex;
@@ -61,21 +65,140 @@ const Name = styled.span`
   color: ${({ theme }) => theme.colors.blue.darkest};
 `;
 
+const Dropdown = styled.div`
+  width: 120px;
+  position: absolute;
+  top: 72px;
+  z-index: ${({ theme }) => theme.zIndex.dropdown};
+
+  border: 1px solid ${({ theme }) => theme.colors.mono[400]};
+  border-radius: ${({ theme }) => theme.borderRadius};
+
+  box-shadow: ${({ theme }) => theme.shadow.light};
+
+  &:before {
+    content: '';
+    position: absolute;
+    display: block;
+    top: -5px;
+    left: calc(50% - 5px);
+
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid ${({ theme }) => theme.colors.mono.white};
+  }
+`;
+
+const DropdownList = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: ${({ theme }) => theme.borderRadius};
+  overflow: hidden;
+`;
+
+const DropdownLink = styled.span`
+  width: 100%;
+  padding: 4px 6px;
+
+  background-color: ${({ theme }) => theme.colors.mono.white};
+  cursor: pointer;
+
+  a {
+    font-family: ${({ theme }) => theme.font};
+    font-size: ${({ theme }) => theme.type.size.paragraph};
+    font-weight: ${({ theme }) => theme.type.weight.paragraph};
+    text-align: left;
+    color: ${({ danger, theme }) => danger ? theme.colors.red.base : theme.colors.blue.darkest};
+    text-decoration: none;
+  }
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.blue.base};
+
+    a {
+      color: ${({ theme }) => theme.colors.mono.white};
+    }
+  }
+`;
+
 export default function NavMenu() {
-  const { authentication: { account } } = useApplicationContext();
+  const apiFetch = useApiFetch();
+  const navigate = useNavigate();
+
+  const { authentication: { account }, dispatch } = useApplicationContext();
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const containerRef = useClickOutside(() => setIsOpen(false));
 
   const avatarUrl = (account && account.avatarUrl) || '';
 
   const name = account ? `${account.firstName}${account.lastName ? ` ${account.lastName}` : ''}` : '';
 
+  function onLogout() {
+    apiFetch('/v1/logout', { method: 'POST' })
+      .then(async (response) => {
+        if (response.status === 202) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('token-expiration');
+          localStorage.removeItem('lastActiveCampaignId');
+
+          dispatch((state) => ({
+            ...state,
+            authentication: {
+              account: null,
+              token: null,
+            },
+          }));
+
+          navigate(LOGIN_ROUTE);
+          return;
+        }
+
+        const json = await response.json();
+
+        throw new Error(json.error || 'Failed to logout');
+      })
+      .catch((error) => {
+        console.error(error);
+        // TODO: Snack error
+      });
+  }
+
+  if (!account) {
+    // TODO...
+    return null;
+  }
+
   return (
-    <Container>
+    <Container ref={containerRef} onClick={() => setIsOpen(!isOpen)}>
       <Avatar>
-        <img src={avatarUrl} />
+        <img alt="Profile avatar" src={avatarUrl} />
       </Avatar>
       <Name>
         {name}
       </Name>
+      {isOpen && (
+        <Dropdown onBlur={() => setIsOpen(false)}>
+          <DropdownList>
+            <DropdownLink>
+              <Link to={PROFILE_ROUTE.replace(':username', account.username)}>
+                Profile
+              </Link>
+            </DropdownLink>
+            <DropdownLink>
+              <Link to="#">
+                Settings
+              </Link>
+            </DropdownLink>
+            <DropdownLink danger>
+              <a type="button" tabIndex="0" onClick={onLogout}>Sign out</a>
+            </DropdownLink>
+          </DropdownList>
+        </Dropdown>
+      )}
     </Container>
   );
 }

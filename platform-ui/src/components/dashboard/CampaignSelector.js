@@ -8,6 +8,7 @@ import {
   CampaignLocation,
 } from 'components/CampaignStyledComponents';
 import useApiFetch from 'hooks/useApiFetch';
+import useClickOutside from 'hooks/useClickOutside';
 
 const Container = styled.div`
   width: 100%;
@@ -87,13 +88,14 @@ const Dropdown = styled.div`
   display: flex;
   flex-direction: column;
 
-  width: 100%;
   position: absolute;
   top: 72px;
+  z-index: ${({ theme }) => theme.zIndex.dropdown};
 
   border: 1px solid ${({ theme }) => theme.colors.mono[400]};
   border-radius: ${({ theme }) => theme.borderRadius};
 
+  width: 100%;
   max-height: 80vh;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -146,21 +148,7 @@ export default function CampaignSelector() {
   const [allCampaigns, setAllCampaigns] = React.useState(null);
   const [targetCampaign, setTargetCampaign] = React.useState(null);
 
-  const containerRef = React.useRef(null);
-
-  React.useEffect(() => {
-    function handleClickOutside(event) {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [
-    isOpen,
-    setIsOpen,
-  ]);
+  const containerRef = useClickOutside(() => setIsOpen(false));
 
   React.useEffect(() => {
     let cancel = false;
@@ -168,7 +156,6 @@ export default function CampaignSelector() {
     async function fetchAccountCampaigns() {
       try {
         const response = await apiFetch('/v1/account/campaigns');
-
         const json = await response.json();
 
         if (cancel) {
@@ -187,7 +174,7 @@ export default function CampaignSelector() {
       }
     }
 
-    if (account && !accountCampaigns) {
+    if (account && account.campaigns.length && !accountCampaigns) {
       fetchAccountCampaigns();
     }
 
@@ -205,7 +192,6 @@ export default function CampaignSelector() {
     async function fetchAllCampaigns() {
       try {
         const response = await apiFetch('/v1/campaigns');
-
         const json = await response.json();
 
         if (cancel) {
@@ -241,7 +227,6 @@ export default function CampaignSelector() {
     async function volunteerForTargetCampaign() {
       try {
         const response = await apiFetch(`/v1/campaigns/${targetCampaign.id}/volunteer`, { method: 'post' });
-
         const json = await response.json();
 
         if (cancel) {
@@ -300,21 +285,21 @@ export default function CampaignSelector() {
     setTargetCampaign(toCampaign);
   }
 
-  if (!activeCampaign || !account) {
+  if (!account) {
     return null;
   }
 
   return (
     <Container ref={containerRef}>
       <SelectedCampaignRow onClick={() => setIsOpen(!isOpen)}>
-        <CampaignLogo src={activeCampaign.logoUrl} />
+        <CampaignLogo src={(activeCampaign || {}).logoUrl} />
         <CampaignDetails>
-          <CampaignTitle>{activeCampaign.name}</CampaignTitle>
-          <CampaignLocation>{activeCampaign.location}</CampaignLocation>
+          <CampaignTitle>{(activeCampaign || {}).name}</CampaignTitle>
+          <CampaignLocation>{(activeCampaign || {}).location}</CampaignLocation>
         </CampaignDetails>
       </SelectedCampaignRow>
       {isOpen && (
-        <Dropdown isLoading={!!targetCampaign}>
+        <Dropdown isLoading={!!targetCampaign} onBlur={() => setIsOpen(false)}>
           <DropdownTitleRow>Your Campaigns</DropdownTitleRow>
           {accountCampaigns && accountCampaigns.map((campaign) => (
             <DropdownCampaignRow key={campaign.id} onClick={() => onSwitchCampaign(campaign)}>

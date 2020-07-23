@@ -96,3 +96,27 @@ export const BoldTextButton = styled.span`
     }
   }
 `;
+
+export const CancelButton = styled.button`
+  font-family: ${({ theme }) => theme.font};
+  font-size: ${({ theme }) => theme.type.size.button};
+  font-weight: ${({ theme }) => theme.type.weight.button};
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+  letter-spacing: 1px;
+
+  color: ${({ theme }) => theme.colors.red.base};
+  background: none;
+  border: 1px solid transparent;
+  border-radius: ${({ theme }) => theme.borderRadius};
+
+  cursor: pointer;
+
+  padding: 8px 16px;
+  margin: 0;
+
+  &:hover {
+    border: 1px solid ${({ theme }) => theme.colors.red.base};
+  }
+`;

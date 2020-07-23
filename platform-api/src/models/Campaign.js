@@ -1,4 +1,3 @@
-const { ObjectID } = require('mongodb');
 const PaginatedResponse = require('../utils/PaginatedResponse');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 const endProcessOnFail = require('../utils/endProcessOnFail');
@@ -10,11 +9,11 @@ const endProcessOnFail = require('../utils/endProcessOnFail');
  * @param {String} name Campaign name
  * @param {String} logoUrl URL representing the campaign logo
  * @param {String} location Location this campaign is taking place
- * @param {Array<String>} admins Account IDs that have full permissions over this campaign
- * @param {Array<String>} staff Account IDs that have staff permissions over this campaign
- * @param {Array<String>} moderators Account IDs that have moderator permissions over this campaign
- * @param {Array<String>} blocked Account IDs that are blocked from interacting with this campaign
- * @param {Array<String>} firewall Campaign IDs that volunteers cannot participate in if they are volunteering with this campaigns
+ * @param {Array<ObjectID>} admins Account IDs that have full permissions over this campaign
+ * @param {Array<ObjectID>} staff Account IDs that have staff permissions over this campaign
+ * @param {Array<ObjectID>} moderators Account IDs that have moderator permissions over this campaign
+ * @param {Array<ObjectID>} blocked Account IDs that are blocked from interacting with this campaign
+ * @param {Array<ObjectID>} firewall Campaign IDs that volunteers cannot participate in if they are volunteering with this campaigns
  * @param {String} dialer.iframe URL of the iframe to embed for the dialer tool
  * @param {String} sms.iframe URL of the iframe to embed for the SMS tool
  * @param {String} wiki Markdown content for volunteer resources
@@ -52,11 +51,11 @@ module.exports = function(db) {
   /**
    * Get a single campaign
    *
-   * @param {String} id Campaign id
+   * @param {ObjectID} _id Campaign id
    * @return {Promise<Campaign|Error>}
    */
-  async function getCampaignById(id) {
-    const campaign = await collection.findOne({ _id: ObjectID(id) });
+  async function getCampaignById(_id) {
+    const campaign = await collection.findOne({ _id });
 
     return campaign;
   }
@@ -148,13 +147,13 @@ module.exports = function(db) {
   /**
    * Delete a campaign from the database.
    *
-   * @param {String} id Campaign id
+   * @param {ObjectID} _id Campaign id
    * @return {Promise<Boolean|Error>}
    */
-  async function deleteCampaign(id) {
-    await collection.removeOne({ _id: ObjectID(id) });
+  async function deleteCampaign(_id) {
+    const deletionResult = await collection.removeOne({ _id });
 
-    return true;
+    return deletionResult;
   }
 
   return {

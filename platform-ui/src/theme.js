@@ -51,6 +51,7 @@ const theme = {
       input: '18px',
       label: '16px',
       paragraph: '18px',
+      header: '28px',
     },
     weight: {
       button: 900,
@@ -58,10 +59,13 @@ const theme = {
       input: 400,
       label: 800,
       paragraph: 400,
+      header: 800,
     },
   },
   zIndex: {
+    dropdown: 90,
     onboarding: 100,
+    modal: 110,
   },
 };
 

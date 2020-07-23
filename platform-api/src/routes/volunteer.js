@@ -1,4 +1,7 @@
+const { ObjectID } = require('mongodb');
+
 const Account = require('../models/Account');
+const Activity = require('../models/Activity');
 const Campaign = require('../models/Campaign');
 const transformAccount = require('../transformers/transformAccount');
 const transformCampaign = require('../transformers/transformCampaign');
@@ -14,7 +17,7 @@ module.exports = () => {
       return;
     }
 
-    const campaign = await Campaign(db).getCampaignById(campaignId);
+    const campaign = await Campaign(db).getCampaignById(ObjectID(campaignId));
 
     if (campaign instanceof Error) {
       throw campaign;
@@ -26,8 +29,10 @@ module.exports = () => {
     }
 
     const { firewall } = campaign;
+    const currentCampaignIds = account.campaigns.map((id) => id.toString());
+
     const conflicts = firewall && firewall.filter((firewalledCampaignId) => (
-      account.campaigns.includes(firewalledCampaignId)
+      currentCampaignIds.includes(firewalledCampaignId.toString())
     ));
 
     if (conflicts && conflicts.length) {
@@ -57,13 +62,22 @@ module.exports = () => {
       return;
     }
 
-    const { value: updatedAccount } = await Account(db).collection.findOneAndUpdate(
-      { _id: account._id },
-      { '$push': { campaigns: campaign._id.toString() } },
-      { returnOriginal: false },
+    const activityResult = await Activity(db).createActivity(
+      account,
+      campaign,
+      'joined',
+      null,
     );
 
-    console.log(updatedAccount, campaign);
+    if (activityResult instanceof Error) {
+      throw activityResult;
+    }
+
+    const { value: updatedAccount } = await Account(db).collection.findOneAndUpdate(
+      { _id: account._id },
+      { '$push': { campaigns: campaign._id } },
+      { returnOriginal: false },
+    );
 
     res.json({
       data: {
