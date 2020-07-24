@@ -1,7 +1,7 @@
 import React from 'react';
 import ago from 's-ago';
 import styled from 'styled-components';
-import { Link, useNavigate } from '@reach/router';
+import { useNavigate } from '@reach/router';
 import Prompt from 'components/Prompt';
 import {
   ActivityRow,
@@ -55,6 +55,7 @@ export default function AccountActivityFeed(props) {
     }
   }, [
     apiFetch,
+    dispatch,
     navigate,
     confirmationTarget,
     hasConfirmed,

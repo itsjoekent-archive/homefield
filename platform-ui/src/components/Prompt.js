@@ -106,7 +106,7 @@ export default function Prompt(props) {
             <CancelButton onClick={onClose}>
               {cancelLabel}
             </CancelButton>
-            <LightBlueButton onClick={onConfirmation} loading={`${hasSubmitted}`}>
+            <LightBlueButton onClick={onClick} loading={`${hasSubmitted}`}>
               {confirmLabel}
             </LightBlueButton>
           </ButtonRow>

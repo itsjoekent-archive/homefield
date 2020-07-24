@@ -31,6 +31,17 @@ module.exports = () => {
     const { firewall } = campaign;
     const currentCampaignIds = account.campaigns.map((id) => id.toString());
 
+    if (currentCampaignIds.find((compareId) => compareId === campaignId)) {
+      res.json({
+        data: {
+          account: transformAccount(account, account),
+          campaign: transformCampaign(campaign, account),
+        },
+      });
+
+      return;
+    }
+
     const conflicts = firewall && firewall.filter((firewalledCampaignId) => (
       currentCampaignIds.includes(firewalledCampaignId.toString())
     ));

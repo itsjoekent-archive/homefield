@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const ActivityRow = styled.div`
   display: flex;
@@ -17,6 +17,11 @@ export const Avatar = styled.img`
   display: block;
   width: 64px;
   height: 64px;
+
+  border-radius: 50%;
+  ${({ isProfile, theme }) => isProfile && css`
+    border: 4px solid ${theme.colors.blue.base};
+  `}
 
   margin-right: 16px;
 

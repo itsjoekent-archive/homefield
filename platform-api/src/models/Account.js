@@ -93,7 +93,14 @@ module.exports = function Account(db) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const avatarHash = crypto.createHash('md5').update(email).digest('hex');
-    const avatarUrl = hashicon(avatarHash, { createCanvas, size: 128 }).toDataURL();
+    const avatarHasicon = hashicon(avatarHash, { createCanvas, size: 512 });
+
+    const avatarCanvas = createCanvas(256, 256);
+    const ctx = avatarCanvas.getContext('2d');
+
+    ctx.drawImage(avatarHasicon, 128, 128, 256, 256, 0, 0, 256, 256);
+
+    const avatarUrl = avatarCanvas.toDataURL();
 
     const createdAt = Date.now();
     const username = encodeURIComponent(`${firstName.replace(/ /g, '')}-${createdAt.toString().slice(Math.round(createdAt.toString().length / 2))}`.toLowerCase());

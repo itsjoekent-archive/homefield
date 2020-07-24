@@ -16,7 +16,7 @@ export default function CampaignActivityFeed(props) {
   return activity.map((item) => (
     <ActivityRow key={item.id}>
       <Link to={PROFILE_ROUTE.replace(':username', item.account.username)}>
-        <Avatar src={item.account.avatarUrl} />
+        <Avatar isProfile src={item.account.avatarUrl} />
       </Link>
       <ActivityDetails>
         {(() => {

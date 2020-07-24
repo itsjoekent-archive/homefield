@@ -77,12 +77,6 @@ const BioColumn = styled.div`
   flex-direction: column;
 
   width: calc(33.33% - 24px);
-
-  a {
-    ${LightBlueButton} {
-      text-decoration: none;
-    }
-  }
 `;
 
 const Avatar = styled.img`
@@ -180,6 +174,12 @@ const BioCampaignLogo = styled.img`
   margin-bottom: 16px;
 `;
 
+const BioEditProfileWrapper = styled.span`
+  a {
+    text-decoration: none;
+  }
+`;
+
 export default function ProfilePage(props) {
   const { username } = props;
 
@@ -275,7 +275,7 @@ export default function ProfilePage(props) {
               )}
               {account.twitterUsername && (
                 <BioTwitterRow>
-                  <img src="/twitter.png" />
+                  <img src="/twitter.png" alt="Twitter Logo" />
                   <BioTwitterLink href={`https://twitter.com/${account.twitterUsername}`} target="_blank" rel="noopener noreferrer">
                     {account.twitterUsername}
                   </BioTwitterLink>
@@ -295,10 +295,12 @@ export default function ProfilePage(props) {
                 </BioCampaignContainer>
               )}
               {authenticatedAccount && authenticatedAccount.id === account.id && (
-                <Link to="/profile/edit">
-                  {/* TODO: Profile edit page */}
-                  <LightBlueButton>Edit Profile</LightBlueButton>
-                </Link>
+                <BioEditProfileWrapper>
+                  <Link to="/profile/edit">
+                    {/* TODO: Profile edit page */}
+                    <LightBlueButton>Edit Profile</LightBlueButton>
+                  </Link>
+                </BioEditProfileWrapper>
               )}
             </React.Fragment>
           )}
