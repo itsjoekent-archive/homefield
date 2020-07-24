@@ -18,7 +18,8 @@ const { DEFAULT_USER_ROLE } = require('../utils/accountRoles');
  * @param {String} firstName Account first name
  * @param {String} lastName Account last name
  * @param {String} avatarUrl Account avatar image url
- * @param {String} twitterUrl Twitter account that belongs to this account holder
+ * @param {String} bio Account bio
+ * @param {String} twitterUsername Twitter account that belongs to this account holder
  * @param {Array<String>} campaigns List of campaigns this account is volunteering for
  * @param {Boolean} isBanned Flag indicting if this account has been banned
  * @param {String} role Platform account role
@@ -105,7 +106,8 @@ module.exports = function Account(db) {
       firstName,
       lastName: null,
       avatarUrl,
-      twitterUrl: null,
+      bio: null,
+      twitterUsername: null,
       campaigns: [],
       isBanned: false,
       role: DEFAULT_USER_ROLE,

@@ -18,7 +18,7 @@ const BlankContainerTitle = styled.h2`
   font-size: ${({ theme }) => theme.type.size.header};
   font-weight: ${({ theme }) => theme.type.weight.header};;
   text-align: center;
-  color: ${({ theme }) => theme.colors.blue.darkest};
+  color: ${({ theme }) => theme.colors.blue.light};
 `;
 
 const Container = styled.div`
@@ -108,7 +108,7 @@ export default function Activity(props) {
   if (activity && !activity.length) {
     return (
       <BlankContainer>
-        <BlankContainerTitle>Nothing to see here yet!</BlankContainerTitle>
+        <BlankContainerTitle>Nothing to see here yet! 👀</BlankContainerTitle>
       </BlankContainer>
     );
   }

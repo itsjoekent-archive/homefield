@@ -2,6 +2,7 @@ const { MongoClient } = require('mongodb');
 
 const setupDb = require('../src/setupDb');
 const Account = require('../src/models/Account');
+const Activity = require('../src/models/Activity');
 const Campaign = require('../src/models/Campaign');
 
 (async function seed() {
@@ -21,7 +22,7 @@ const Campaign = require('../src/models/Campaign');
     await db.dropDatabase();
     await setupDb(db);
 
-    console.log('Seeding accounts...');
+    console.log('Seeding admin accounts...');
 
     const adminAccountResult = await Account(db).createAccount(
       'admin@homefield.com',
@@ -33,7 +34,6 @@ const Campaign = require('../src/models/Campaign');
       throw adminAccountResult;
     }
 
-    // seed campaigns
     console.log('Seeding campaigns...');
 
     const campaigns = await Promise.all([
@@ -78,6 +78,79 @@ const Campaign = require('../src/models/Campaign');
       { _id: campaign._id },
       { '$set': { isPublic: true } },
     )));
+
+    console.log('Seeding volunteer accounts...');
+
+    const suzy = await Account(db).createAccount(
+      'suzy@votefromhome2020.org',
+      'password',
+      'Suzy',
+    );
+
+    await Account(db).collection.findOneAndUpdate(
+      { _id: suzy._id },
+      {
+        '$set': {
+          username: 'suzy',
+          lastName: 'Smith',
+          bio: 'Co-Founder of Vote From Home 2020. Proud to have worked for @ewarren, @LetAmericaVote, @JasonKander, @SylvesterTurner & MI Dems. She/Her',
+          twitterUsername: 'suzytweet',
+          avatarUrl: '/seed/vol-suzy.jpeg',
+          campaigns: [campaigns[0]._id],
+        },
+      }
+    );
+
+    await Activity(db).createActivity(
+      suzy,
+      campaigns[0],
+      'joined',
+      null,
+    );
+
+    const ben = await Account(db).createAccount(
+      'ben@votefromhome2020.org',
+      'password',
+      'Ben',
+    );
+
+    await Account(db).collection.findOneAndUpdate(
+      { _id: ben._id },
+      {
+        '$set': {
+          username: 'ben',
+          lastName: 'Tyson',
+          bio: 'Co-Founder @votefromhome20 . Previously organizing for @letamericavote @jasonkander @sylvesterturner @michigandems @clairecmc @michaelbennet ... I help elect Dems',
+          twitterUsername: 'bhtyson',
+          avatarUrl: '/seed/vol-ben.jpeg',
+          campaigns: [campaigns[0]._id],
+        },
+      },
+    );
+
+    await Activity(db).createActivity(
+      ben,
+      campaigns[0],
+      'joined',
+      null,
+    );
+
+    const keith = await Account(db).createAccount(
+      'keith@votefromhome2020.org',
+      'password',
+      'Keith',
+    );
+
+    await Account(db).collection.findOneAndUpdate(
+      { _id: keith._id },
+      {
+        '$set': {
+          username: 'keith',
+          lastName: 'Presley',
+          avatarUrl: '/seed/vol-keith.png',
+        },
+      },
+    );
 
     console.log('Seed finished!');
     process.exit(0);

@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link } from '@reach/router';
+import NotFoundPage from 'pages/NotFoundPage';
 import ActivityFeed from 'components/activity/ActivityFeed';
 import NavMenu from 'components/NavMenu';
 import { LightBlueButton } from 'components/Buttons';
@@ -78,15 +79,22 @@ const BioColumn = styled.div`
   width: calc(33.33% - 24px);
 
   a {
-    text-decoration: none;
+    ${LightBlueButton} {
+      text-decoration: none;
+    }
   }
 `;
 
 const Avatar = styled.img`
   display: block;
   width: 100%;
-  max-width: 128px;
+  max-width: 256px;
 
+  border-radius: 50%;
+  border: 4px solid ${({ theme }) => theme.colors.blue.base};
+
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: 32px;
 `;
 
@@ -96,7 +104,49 @@ const BioName = styled.h1`
   font-weight: ${({ theme }) => theme.type.weight.title};;
   color: ${({ theme }) => theme.colors.mono.black};
 
+  text-align: center;
+
   margin-bottom: 16px;
+`;
+
+const BioDescription = styled.p`
+  font-family: ${({ theme }) => theme.font};
+  font-size: ${({ theme }) => theme.type.size.paragraph};
+  font-weight: ${({ theme }) => theme.type.weight.paragraph};;
+  color: ${({ theme }) => theme.colors.mono.black};
+
+  margin-bottom: 16px;
+`;
+
+const BioTwitterRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  margin-bottom: 16px;
+
+  img {
+    width: 22px;
+    height: 22px;
+    margin-right: 8px;
+  }
+`;
+
+const BioTwitterLink = styled.a`
+  font-family: ${({ theme }) => theme.font};
+  font-size: ${({ theme }) => theme.type.size.paragraph};
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.purple.base};
+  text-decoration: none;
+
+  cursor: pointer;
+
+  padding-bottom: 4px;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.purple.dark};
+    text-decoration: underline;
+  }
 `;
 
 const BioCampaignContainer = styled.div`
@@ -170,6 +220,11 @@ export default function ProfilePage(props) {
           return;
         }
 
+        if (response.status === 404) {
+          setAccount('404');
+          return;
+        }
+
         throw new Error(json.error || 'Failed to load profile');
       } catch (error) {
         console.error(error);
@@ -189,6 +244,12 @@ export default function ProfilePage(props) {
     setAccount,
   ]);
 
+  if (account === '404') {
+    return (
+      <NotFoundPage />
+    );
+  }
+
   return (
     <React.Fragment>
       <NavContainer>
@@ -207,7 +268,20 @@ export default function ProfilePage(props) {
               <BioName>
                 {account.firstName} {account.lastName}
               </BioName>
-              {account.campaigns && (
+              {account.bio && (
+                <BioDescription>
+                  {account.bio}
+                </BioDescription>
+              )}
+              {account.twitterUsername && (
+                <BioTwitterRow>
+                  <img src="/twitter.png" />
+                  <BioTwitterLink href={`https://twitter.com/${account.twitterUsername}`} target="_blank" rel="noopener noreferrer">
+                    {account.twitterUsername}
+                  </BioTwitterLink>
+                </BioTwitterRow>
+              )}
+              {!!account.campaigns && !!account.campaigns.length && (
                 <BioCampaignContainer>
                   <BioCampaignHeader>Campaigns</BioCampaignHeader>
                   <BioCampaignRow>

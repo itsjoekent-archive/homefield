@@ -19,7 +19,8 @@ module.exports = function transformAccount(account, authorizer) {
     firstName,
     lastName,
     avatarUrl,
-    twitterUrl,
+    bio,
+    twitterUsername,
     campaigns,
     isBanned,
     createdAt,
@@ -32,7 +33,8 @@ module.exports = function transformAccount(account, authorizer) {
     firstName,
     lastName,
     avatarUrl,
-    twitterUrl,
+    bio,
+    twitterUsername,
     campaigns: campaigns.map((item) => {
       if (item._id) {
         return transformCampaign(item, authorizer);
