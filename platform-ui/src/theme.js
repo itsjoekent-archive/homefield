@@ -52,6 +52,7 @@ const theme = {
       label: '16px',
       paragraph: '18px',
       header: '28px',
+      title: '36px',
     },
     weight: {
       button: 900,
@@ -60,6 +61,7 @@ const theme = {
       label: 800,
       paragraph: 400,
       header: 800,
+      title: 800,
     },
   },
   zIndex: {

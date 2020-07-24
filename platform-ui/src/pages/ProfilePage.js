@@ -3,9 +3,11 @@ import styled from 'styled-components';
 import { Link } from '@reach/router';
 import ActivityFeed from 'components/activity/ActivityFeed';
 import NavMenu from 'components/NavMenu';
+import { LightBlueButton } from 'components/Buttons';
 import useApiFetch from 'hooks/useApiFetch';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
 import usePrevious from 'hooks/usePrevious';
+import { useApplicationContext } from 'ApplicationContext';
 import { DASHBOARD_ROUTE } from 'routes';
 import logo from 'assets/logo-name-blue-100.png';
 
@@ -69,10 +71,71 @@ const ActivityHeader = styled.h2`
   margin-bottom: 24px;
 `;
 
+const BioColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  width: calc(33.33% - 24px);
+
+  a {
+    text-decoration: none;
+  }
+`;
+
+const Avatar = styled.img`
+  display: block;
+  width: 100%;
+  max-width: 128px;
+
+  margin-bottom: 32px;
+`;
+
+const BioName = styled.h1`
+  font-family: ${({ theme }) => theme.font};
+  font-size: ${({ theme }) => theme.type.size.title};
+  font-weight: ${({ theme }) => theme.type.weight.title};;
+  color: ${({ theme }) => theme.colors.mono.black};
+
+  margin-bottom: 16px;
+`;
+
+const BioCampaignContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  margin-top: 24px;
+  margin-bottom: 24px;
+`;
+
+const BioCampaignRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+`;
+
+const BioCampaignHeader = styled.h2`
+  font-family: ${({ theme }) => theme.font};
+  font-size: ${({ theme }) => theme.type.size.paragraph};
+  font-weight: ${({ theme }) => theme.type.weight.header};;
+  color: ${({ theme }) => theme.colors.mono.black};
+
+  margin-bottom: 16px;
+`;
+
+const BioCampaignLogo = styled.img`
+  display: block;
+  width: 36px;
+  height: 36px;
+  margin-right: 16px;
+  margin-bottom: 16px;
+`;
+
 export default function ProfilePage(props) {
   const { username } = props;
 
   useAuthorizationGate(false);
+
+  const { authentication: { account: authenticatedAccount } } = useApplicationContext();
 
   const apiFetch = useApiFetch();
   const previousUsername = usePrevious(username);
@@ -137,6 +200,35 @@ export default function ProfilePage(props) {
         </NavRow>
       </NavContainer>
       <Layout>
+        <BioColumn>
+          {!!account && (
+            <React.Fragment>
+              <Avatar src={account.avatarUrl} />
+              <BioName>
+                {account.firstName} {account.lastName}
+              </BioName>
+              {account.campaigns && (
+                <BioCampaignContainer>
+                  <BioCampaignHeader>Campaigns</BioCampaignHeader>
+                  <BioCampaignRow>
+                    {account.campaigns.map((campaign) => (
+                      <React.Fragment key={campaign.id}>
+                        {/* TODO: Links to the campaign */}
+                        <BioCampaignLogo src={campaign.logoUrl} />
+                      </React.Fragment>
+                    ))}
+                  </BioCampaignRow>
+                </BioCampaignContainer>
+              )}
+              {authenticatedAccount && authenticatedAccount.id === account.id && (
+                <Link to="/profile/edit">
+                  {/* TODO: Profile edit page */}
+                  <LightBlueButton>Edit Profile</LightBlueButton>
+                </Link>
+              )}
+            </React.Fragment>
+          )}
+        </BioColumn>
         <ActivityColumn>
           <ActivityHeader>Recent Activity</ActivityHeader>
           <ActivityFeed username={username} />
