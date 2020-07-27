@@ -1,43 +1,20 @@
 import React from 'react';
-import styled from 'styled-components';
-import { Link } from '@reach/router';
+import styled, { css } from 'styled-components';
+import { useNavigate } from '@reach/router';
 import NotFoundPage from 'pages/NotFoundPage';
+import AppNav from 'components/AppNav';
 import ActivityFeed from 'components/activity/ActivityFeed';
-import NavMenu from 'components/NavMenu';
-import { LightBlueButton } from 'components/Buttons';
+import { CancelButton, LightBlueButton, MutedButton } from 'components/Buttons';
+import FormController from 'components/forms/FormController';
+import TextInput from 'components/forms/TextInput';
+import SubmitButton from 'components/forms/SubmitButton';
+import FormErrorMessage from 'components/forms/FormErrorMessage';
+import requiredTextValidator from 'components/forms/requiredTextValidator';
 import useApiFetch from 'hooks/useApiFetch';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
 import usePrevious from 'hooks/usePrevious';
 import { useApplicationContext } from 'ApplicationContext';
-import { DASHBOARD_ROUTE } from 'routes';
-import logo from 'assets/logo-name-blue-100.png';
-
-const NavContainer = styled.nav`
-  background-color: ${({ theme }) => theme.colors.mono[200]};
-  border-bottom: 2px solid ${({ theme }) => theme.colors.mono[400]};
-
-  padding-top: 16px;
-  padding-bottom: 16px;
-`;
-
-const NavRow = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-
-  width: 100%;
-  max-width: 1240px;
-
-  margin-left: auto;
-  margin-right: auto;
-
-  padding-left: 24px;
-  padding-right: 24px;
-`;
-
-const Logo = styled.img`
-  width: 200px;
-`;
+import { PROFILE_ROUTE } from 'routes';
 
 const Layout = styled.main`
   display: flex;
@@ -53,6 +30,8 @@ const Layout = styled.main`
 
   padding-left: 24px;
   padding-right: 24px;
+
+  padding-bottom: 48px;
 `;
 
 const ActivityColumn = styled.div`
@@ -180,17 +159,68 @@ const BioEditProfileWrapper = styled.span`
   }
 `;
 
+const BioEditButtonRow = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  ${LightBlueButton} {
+    margin-right: 16px;
+  }
+`;
+
+const BioUploadAvatarContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  border-radius: 50%;
+  overflow: hidden;
+
+  ${MutedButton} {
+    display: none;
+    position: absolute;
+  }
+
+  input {
+    display: none;
+  }
+
+  &:hover {
+    ${MutedButton} {
+      display: flex;
+    }
+  }
+
+  ${({ hasSubmittedAvatar }) => hasSubmittedAvatar && css`
+    ${MutedButton} {
+      display: flex;
+    }
+  `}
+`;
+
 export default function ProfilePage(props) {
   const { username } = props;
 
   useAuthorizationGate(false);
 
-  const { authentication: { account: authenticatedAccount } } = useApplicationContext();
+  const {
+    authentication: {
+      account: authenticatedAccount,
+      token,
+    },
+    dispatch,
+  } = useApplicationContext();
 
   const apiFetch = useApiFetch();
   const previousUsername = usePrevious(username);
+  const navigate = useNavigate();
 
   const [account, setAccount] = React.useState(null);
+  const [isEditing, setIsEditing] = React.useState(false);
+
+  const [hasSubmittedAvatar, setHasSubmittedAvatar] = React.useState(null);
+  const avatarInputRef = React.useRef(null);
 
   React.useEffect(() => {
     if (account && (username !== previousUsername)) {
@@ -244,6 +274,119 @@ export default function ProfilePage(props) {
     setAccount,
   ]);
 
+  React.useEffect(() => {
+    async function uploadAvatar() {
+      try {
+        const file = avatarInputRef.current.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const avatarResponse = await fetch(`${process.env.REACT_APP_API_URL}/v1/files`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const avatarJson = await avatarResponse.json();
+
+        if (avatarResponse.status !== 200) {
+          throw new Error(avatarJson.error || 'Failed to upload avatar');
+        }
+
+        const { data: { filename } } = avatarJson;
+
+        const profileResponse = await apiFetch('/v1/accounts/avatar', {
+          method: 'put',
+          body: JSON.stringify({ filename }),
+        });
+
+        const profileJson = await profileResponse.json();
+
+        if (profileResponse.status !== 200) {
+          throw new Error(profileJson.error || 'Failed to update avatar');
+        }
+
+        setAccount({ ...account, avatarUrl: profileJson.data.account.avatarUrl });
+        setHasSubmittedAvatar(false);
+      } catch (error) {
+        console.error(error);
+        // TODO: Snack error
+      }
+    }
+
+    if (hasSubmittedAvatar) {
+      uploadAvatar();
+    }
+  }, [
+    account,
+    apiFetch,
+    hasSubmittedAvatar,
+    setHasSubmittedAvatar,
+    setAccount,
+    token,
+  ]);
+
+  async function onEditProfile(state) {
+    const {
+      values: {
+        firstName,
+        lastName,
+        username,
+        twitterUsername,
+        bio,
+      },
+    } = state;
+
+    const hasUsernameChanged = account.username !== username;
+
+    const twitterUsernameFormatted = twitterUsername.replace('@', '');
+
+    const payload = {
+      firstName,
+      lastName,
+      username,
+      twitterUsername: twitterUsernameFormatted,
+      bio,
+    };
+
+    const response = await apiFetch('/v1/accounts', {
+      method: 'put',
+      body: JSON.stringify(payload),
+    });
+
+    const json = await response.json();
+
+    if (response.status === 200) {
+      const { data: { account: updatedAccount } } = json;
+
+      dispatch((state) => ({
+        ...state,
+        authentication: { ...state.authentication, account: updatedAccount },
+      }));
+
+      setAccount({ ...account, ...payload });
+      setIsEditing(false);
+
+      if (hasUsernameChanged) {
+        navigate(PROFILE_ROUTE.replace(':username', username));
+      }
+
+      return;
+    }
+
+    return {
+      formError: json.error || 'Failed to update profile',
+    };
+  }
+
+  function onAvatarUploadClick() {
+    if (avatarInputRef.current) {
+      avatarInputRef.current.click();
+    }
+  }
+
   if (account === '404') {
     return (
       <NotFoundPage />
@@ -252,54 +395,114 @@ export default function ProfilePage(props) {
 
   return (
     <React.Fragment>
-      <NavContainer>
-        <NavRow>
-          <Link to={DASHBOARD_ROUTE}>
-            <Logo src={logo} />
-          </Link>
-          <NavMenu />
-        </NavRow>
-      </NavContainer>
+      <AppNav />
       <Layout>
         <BioColumn>
           {!!account && (
             <React.Fragment>
-              <Avatar src={account.avatarUrl} />
+              {authenticatedAccount && account.id === authenticatedAccount.id ? (
+                <BioUploadAvatarContainer isUploading={hasSubmittedAvatar}>
+                  <MutedButton
+                    onClick={onAvatarUploadClick}
+                    loading={`${hasSubmittedAvatar}`}
+                  >
+                    Upload
+                  </MutedButton>
+                  <input
+                    aria-disabled
+                    type="file"
+                    ref={avatarInputRef}
+                    onChange={() => setHasSubmittedAvatar(true)}
+                  />
+                  <Avatar src={account.avatarUrl} />
+                </BioUploadAvatarContainer>
+              ) : (
+                <Avatar src={account.avatarUrl} />
+              )}
               <BioName>
                 {account.firstName} {account.lastName}
               </BioName>
-              {account.bio && (
-                <BioDescription>
-                  {account.bio}
-                </BioDescription>
+              {isEditing && (
+                <FormController formId="edit-profile" asyncOnSubmit={onEditProfile}>
+                  <TextInput
+                    fieldId="firstName"
+                    label="First Name"
+                    defaultValue={account.firstName}
+                    onValueChange={requiredTextValidator('firstName', 'First name')}
+                  />
+                  <TextInput
+                    fieldId="lastName"
+                    label="Last Name"
+                    defaultValue={account.lastName}
+                  />
+                  <TextInput
+                    fieldId="username"
+                    label="Username"
+                    defaultValue={account.username}
+                    onValueChange={requiredTextValidator('username', 'Username', 3)}
+                  />
+                  <TextInput
+                    fieldId="twitterUsername"
+                    label="Twitter Username"
+                    help="eg: @votefromhome2020"
+                    defaultValue={account.twitterUsername}
+                  />
+                  <TextInput
+                    fieldId="bio"
+                    label="Bio"
+                    defaultValue={account.bio}
+                    isTextArea
+                  />
+                  <BioEditButtonRow>
+                    <SubmitButton
+                      renderButton={(buttonProps) => (
+                        <LightBlueButton {...buttonProps}>
+                          Save
+                        </LightBlueButton>
+                      )}
+                    />
+                    <CancelButton onClick={() => setIsEditing(false)}>
+                      Cancel
+                    </CancelButton>
+                  </BioEditButtonRow>
+                  <FormErrorMessage />
+                </FormController>
               )}
-              {account.twitterUsername && (
-                <BioTwitterRow>
-                  <img src="/twitter.png" alt="Twitter Logo" />
-                  <BioTwitterLink href={`https://twitter.com/${account.twitterUsername}`} target="_blank" rel="noopener noreferrer">
-                    {account.twitterUsername}
-                  </BioTwitterLink>
-                </BioTwitterRow>
+              {!isEditing && (
+                <React.Fragment>
+                  {account.bio && (
+                    <BioDescription>
+                      {account.bio}
+                    </BioDescription>
+                  )}
+                  {account.twitterUsername && (
+                    <BioTwitterRow>
+                      <img src="/twitter.png" alt="Twitter Logo" />
+                      <BioTwitterLink href={`https://twitter.com/${account.twitterUsername}`} target="_blank" rel="noopener noreferrer">
+                        {account.twitterUsername}
+                      </BioTwitterLink>
+                    </BioTwitterRow>
+                  )}
+                  {!!account.campaigns && !!account.campaigns.length && (
+                    <BioCampaignContainer>
+                      <BioCampaignHeader>Campaigns</BioCampaignHeader>
+                      <BioCampaignRow>
+                        {account.campaigns.map((campaign) => (
+                          <React.Fragment key={campaign.id}>
+                            {/* TODO: Links to the campaign */}
+                            <BioCampaignLogo src={campaign.logoUrl} />
+                          </React.Fragment>
+                        ))}
+                      </BioCampaignRow>
+                    </BioCampaignContainer>
+                  )}
+                </React.Fragment>
               )}
-              {!!account.campaigns && !!account.campaigns.length && (
-                <BioCampaignContainer>
-                  <BioCampaignHeader>Campaigns</BioCampaignHeader>
-                  <BioCampaignRow>
-                    {account.campaigns.map((campaign) => (
-                      <React.Fragment key={campaign.id}>
-                        {/* TODO: Links to the campaign */}
-                        <BioCampaignLogo src={campaign.logoUrl} />
-                      </React.Fragment>
-                    ))}
-                  </BioCampaignRow>
-                </BioCampaignContainer>
-              )}
-              {authenticatedAccount && authenticatedAccount.id === account.id && (
+              {!isEditing && authenticatedAccount && authenticatedAccount.id === account.id && (
                 <BioEditProfileWrapper>
-                  <Link to="/profile/edit">
-                    {/* TODO: Profile edit page */}
-                    <LightBlueButton>Edit Profile</LightBlueButton>
-                  </Link>
+                  <LightBlueButton onClick={() => setIsEditing(true)}>
+                    Edit Profile
+                  </LightBlueButton>
                 </BioEditProfileWrapper>
               )}
             </React.Fragment>

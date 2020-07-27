@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInputBox } from 'components/forms/TextInputStyled';
+import { TextInputBox, TextAreaBox } from 'components/forms/TextInputStyled';
 import {
   FormFieldContainer,
   Label,
@@ -20,6 +20,7 @@ export default function TextInput(props) {
     placeholder = '',
     help = '',
     htmlType = 'text',
+    isTextArea = false,
     onValueChange = null,
   } = props;
 
@@ -83,6 +84,8 @@ export default function TextInput(props) {
     && !!inputValue
   );
 
+  const InputComponent = isTextArea ? TextAreaBox : TextInputBox;
+
   return (
     <FormFieldContainer>
       {label && (
@@ -91,7 +94,7 @@ export default function TextInput(props) {
       {help && (
         <HelpMessage>{help}</HelpMessage>
       )}
-      <TextInputBox
+      <InputComponent
         id={htmlFieldId}
         type={htmlType}
         value={inputValue}

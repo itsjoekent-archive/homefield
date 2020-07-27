@@ -30,10 +30,6 @@ module.exports = () => {
       _id: { '$in': result.campaigns },
     }).toArray();
 
-    if (campaigns instanceof Error) {
-      throw campaigns;
-    }
-
     const joined = {
       ...result,
       campaigns,

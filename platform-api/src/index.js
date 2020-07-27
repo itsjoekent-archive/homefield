@@ -24,6 +24,8 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
     const db = client.db();
     await setupDb(db);
 
+    app.get('/files/:filename', require('./routes/get-file')(db));
+
     const router = express.Router();
 
     router.use(logger);
@@ -49,9 +51,13 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
       require('./routes/get-account-by-id'),
 
       require('./routes/create-account'),
+      require('./routes/edit-account'),
+      require('./routes/edit-account-avatar'),
       require('./routes/login'),
       require('./routes/logout'),
       require('./routes/token-verify'),
+
+      require('./routes/upload-file'),
     ].forEach((route) => {
       const [method, path, handler, middleware] = route(router);
 

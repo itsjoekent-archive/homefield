@@ -108,7 +108,7 @@ export default function Activity(props) {
   if (activity && !activity.length) {
     return (
       <BlankContainer>
-        <BlankContainerTitle>Nothing to see here yet! 👀</BlankContainerTitle>
+        <BlankContainerTitle>Nothing to see here yet! <span role="img" aria-label="Eyes emoji">👀</span></BlankContainerTitle>
       </BlankContainer>
     );
   }

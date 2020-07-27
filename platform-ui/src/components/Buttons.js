@@ -74,6 +74,20 @@ export const LightBlueButton = styled(Button)`
   ${({ loading }) => loading === 'true' && disabledStyles}
 `;
 
+export const MutedButton = styled(Button)`
+  color: ${({ theme }) => theme.colors.mono.black};
+  background-color: ${({ theme }) => theme.colors.mono[300]};
+
+  ${({ loading }) => (!loading || loading === 'false') && css`
+    &:hover {
+      color: ${({ theme }) => theme.colors.mono.white};
+      background-color: ${({ theme }) => theme.colors.mono[900]};
+    }
+  `}
+
+  ${({ loading }) => loading === 'true' && disabledStyles}
+`;
+
 export const BoldTextButton = styled.span`
   margin-top: 8px;
   margin-bottom: 8px;
@@ -108,7 +122,7 @@ export const CancelButton = styled.button`
 
   color: ${({ theme }) => theme.colors.red.base};
   background: none;
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   border-radius: ${({ theme }) => theme.borderRadius};
 
   cursor: pointer;
@@ -117,6 +131,6 @@ export const CancelButton = styled.button`
   margin: 0;
 
   &:hover {
-    border: 1px solid ${({ theme }) => theme.colors.red.base};
+    border: 2px solid ${({ theme }) => theme.colors.red.base};
   }
 `;

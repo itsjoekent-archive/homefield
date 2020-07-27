@@ -18,10 +18,6 @@ module.exports = () => {
       _id: { '$in': account.campaigns },
     }).toArray();
 
-    if (campaigns instanceof Error) {
-      throw campaigns;
-    }
-
     res.json({
       data: {
         campaigns: campaigns.map((campaign) => transformCampaign(campaign, account)),

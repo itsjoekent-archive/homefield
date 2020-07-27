@@ -2,7 +2,12 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from '@reach/router';
 import { useApplicationContext } from 'ApplicationContext';
-import { LOGIN_ROUTE, PROFILE_ROUTE } from 'routes';
+import {
+  EDIT_ACCOUNT_SETTINGS_ROUTE,
+  EDIT_ACCOUNT_CAMPAIGNS_ROUTE,
+  LOGIN_ROUTE,
+  PROFILE_ROUTE,
+} from 'routes';
 import useClickOutside from 'hooks/useClickOutside';
 import useApiFetch from 'hooks/useApiFetch';
 
@@ -47,6 +52,8 @@ const Avatar = styled.div`
   width: 48px;
   height: 48px;
 
+  border-radius: 50%;
+
   overflow: hidden;
 
   margin-right: 18px;
@@ -66,7 +73,7 @@ const Name = styled.span`
 `;
 
 const Dropdown = styled.div`
-  width: 120px;
+  width: 180px;
   position: absolute;
   top: 72px;
   z-index: ${({ theme }) => theme.zIndex.dropdown};
@@ -185,12 +192,17 @@ export default function NavMenu() {
           <DropdownList>
             <DropdownLink>
               <Link to={PROFILE_ROUTE.replace(':username', account.username)}>
-                Profile
+                Your Profile
               </Link>
             </DropdownLink>
             <DropdownLink>
-              <Link to="#">
-                Settings
+              <Link to={EDIT_ACCOUNT_CAMPAIGNS_ROUTE}>
+                Your Campaigns
+              </Link>
+            </DropdownLink>
+            <DropdownLink>
+              <Link to={EDIT_ACCOUNT_SETTINGS_ROUTE}>
+                Account Settings
               </Link>
             </DropdownLink>
             <DropdownLink danger>
