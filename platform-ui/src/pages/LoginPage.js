@@ -12,7 +12,7 @@ import { LightBlueButton, BoldTextButton } from 'components/Buttons';
 import useApiFetch from 'hooks/useApiFetch';
 import { useApplicationContext } from 'ApplicationContext';
 import {
-  DASHBOARD_ROUTE,
+  DASHBOARD_DEFAULT_ROUTE,
   FORGOT_PASSWORD_ROUTE,
   SIGNUP_ROUTE,
 } from 'routes';
@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   React.useEffect(() => {
     if (authentication.token) {
-      navigate(DASHBOARD_ROUTE);
+      navigate(DASHBOARD_DEFAULT_ROUTE);
     }
     // eslint-disable-next-line
   }, []);
@@ -72,7 +72,7 @@ export default function LoginPage() {
       localStorage.setItem('token', token.bearer);
       localStorage.setItem('token-expiration', token.expiresAt);
 
-      navigate(DASHBOARD_ROUTE);
+      navigate(DASHBOARD_DEFAULT_ROUTE);
 
       return;
     }

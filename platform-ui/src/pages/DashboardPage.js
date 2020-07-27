@@ -1,12 +1,15 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { useNavigate, useLocation } from '@reach/router';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
 import useApiFetch from 'hooks/useApiFetch';
 import { useApplicationContext } from 'ApplicationContext';
 import OnboardingFlow from 'components/onboarding/OnboardingFlow';
 import CampaignSelector from 'components/dashboard/CampaignSelector';
+import CampaignVolunteerPrompt from 'components/dashboard/CampaignVolunteerPrompt';
 import NavMenu from 'components/NavMenu';
 import ActivityFeed from 'components/activity/ActivityFeed';
+import { DASHBOARD_CAMPAIGN_ROUTE } from 'routes';
 import logo from 'assets/logo-name-blue-100.png';
 
 const PageContainer = styled.div`
@@ -120,18 +123,22 @@ const PHONEBANK = 'PHONEBANK';
 const SMS = 'SMS';
 const RESOURCES = 'RESOURCES';
 
-export default function DashboardPage() {
-  useAuthorizationGate();
+export default function DashboardPage(props) {
+  const { slug } = props;
+
+  useAuthorizationGate(false);
 
   const {
-    activeCampaign,
     authentication: { account },
     dispatch,
   } = useApplicationContext();
 
   const [activeTab, setActiveTab] = React.useState(ACTIVITY);
+  const [activeCampaign, setActiveCampaign] = React.useState(null);
 
   const apiFetch = useApiFetch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const tabs = [
     [ACTIVITY, 'Recent Activity'],
@@ -145,50 +152,102 @@ export default function DashboardPage() {
     && !!account.campaigns.length;
 
   React.useEffect(() => {
-    function fetchCampaignAndMakeActive(id) {
-      apiFetch(`/v1/campaigns/${id}`)
-        .then(async (response) => {
-          const json = await response.json();
+    let cancel = false;
 
-          if (response.status === 200) {
-            localStorage.setItem('lastActiveCampaignId', json.data.campaign.id);
-            dispatch((state) => ({ ...state, activeCampaign: json.data.campaign }));
-            return;
-          }
+    async function fetchCampaignAndMakeActive(qualifier, value) {
+      try {
+        const response = await apiFetch(`/v1/campaigns/${qualifier}/${value}`);
+        const json = await response.json();
 
-          // TODO: snack error
-        })
-        .catch((error) => {
-          console.error(error);
-          // TODO: snack error
-        });
+        if (cancel) {
+          return;
+        }
+
+        if (response.status === 200) {
+          localStorage.setItem('lastActiveCampaignSlug', json.data.campaign.slug);
+          setActiveCampaign(json.data.campaign);
+          return;
+        }
+
+        throw new Error(json.error || 'Failed to load campaign');
+      } catch (error) {
+        console.error(error);
+        // TODO: snack error
+      }
     }
 
-    const lastActiveCampaignId = localStorage.getItem('lastActiveCampaignId');
+    const lastActiveCampaignSlug = localStorage.getItem('lastActiveCampaignSlug');
 
-    if (!activeCampaign && lastActiveCampaignId) {
-      fetchCampaignAndMakeActive(lastActiveCampaignId);
-    } else if (!activeCampaign && accountHasCampaigns) {
+    if (!slug && lastActiveCampaignSlug) {
+      fetchCampaignAndMakeActive('slug', lastActiveCampaignSlug);
+    } else if (!slug && accountHasCampaigns) {
       const id = account.campaigns[0];
-      fetchCampaignAndMakeActive(id);
+      fetchCampaignAndMakeActive('id', id);
+    } else if ((slug && !activeCampaign) || (slug && activeCampaign && slug !== activeCampaign.slug)) {
+      fetchCampaignAndMakeActive('slug', slug);
     }
+
+    return () => cancel = true;
   }, [
     account,
-    activeCampaign,
     accountHasCampaigns,
+    activeCampaign,
     apiFetch,
     dispatch,
+    setActiveCampaign,
+    slug,
   ]);
+
+  React.useEffect(() => {
+    if (activeCampaign) {
+      const targetUrl = DASHBOARD_CAMPAIGN_ROUTE.replace(':slug', activeCampaign.slug);
+
+      if (location.pathname !== targetUrl) {
+        navigate(targetUrl);
+      }
+    }
+  }, [
+    activeCampaign,
+    location,
+    navigate,
+  ]);
+
+  function onPromptConfirmation(account) {
+    dispatch((state) => ({
+      ...state,
+      authentication: {
+        ...state.authentication,
+        account,
+      },
+    }));
+  }
+
+  const isNotVolunteeringForActiveCampaign = !!account
+    && accountHasCampaigns
+    && !!activeCampaign
+    && !account.campaigns.includes(activeCampaign.id);
 
   return (
     <PageContainer>
       {!!account && !accountHasCampaigns && (
         <OnboardingFlow />
       )}
+      {isNotVolunteeringForActiveCampaign && (
+        <CampaignVolunteerPrompt
+          campaign={activeCampaign}
+          onConfirmation={onPromptConfirmation}
+        />
+      )}
+      {!account && (
+        <CampaignVolunteerPrompt
+          campaign={activeCampaign}
+          onConfirmation={onPromptConfirmation}
+        />
+      )}
       <NavContainer>
         <Row>
           <NavPlatformRow>
-            <CampaignSelector />
+            <CampaignSelector activeCampaign={activeCampaign} />
             <NavMenu />
           </NavPlatformRow>
         </Row>
@@ -214,10 +273,10 @@ export default function DashboardPage() {
           {activeTab === ACTIVITY && (
             <ActivityFeed campaignId={activeCampaign && activeCampaign.id} />
           )}
-          {activeTab === PHONEBANK && (
+          {activeTab === PHONEBANK && !!account && (
             <Frame src={activeCampaign && activeCampaign.dialer.iframe} />
           )}
-          {activeTab === SMS && (
+          {activeTab === SMS && !!account && (
             <Frame src={activeCampaign && activeCampaign.sms.iframe} />
           )}
         </Row>

@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useNavigate } from '@reach/router';
 import { useApplicationContext } from 'ApplicationContext';
 import Facade, { Layout as FacadeLayout } from 'components/Facade';
 import FacadeBlock from 'components/FacadeBlock';
@@ -13,6 +14,7 @@ import {
 } from 'components/CampaignStyledComponents';
 import { ValidationErrorMessage } from 'components/forms/CommonFormStyledComponents';
 import useApiFetch from 'hooks/useApiFetch';
+import { DASHBOARD_CAMPAIGN_ROUTE } from 'routes';
 
 const OnboardingFlowLayout = styled.div`
   ${FacadeLayout} {
@@ -52,8 +54,9 @@ export default function OnboardingFlow() {
   const [hasSubmitted, setHasSubmitted] = React.useState(null);
   const [formError, setFormError] = React.useState(null);
 
-  const { authentication: { token }, dispatch } = useApplicationContext();
+  const { dispatch } = useApplicationContext();
   const apiFetch = useApiFetch();
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     let cancel = false;
@@ -101,11 +104,13 @@ export default function OnboardingFlow() {
         const json = await response.json();
 
         if (response.status === 200) {
-          localStorage.setItem('lastActiveCampaignId', targetCampaign.id);
+          const { slug } = targetCampaign;
+
+          localStorage.setItem('lastActiveCampaignSlug', slug);
+          navigate(DASHBOARD_CAMPAIGN_ROUTE.replace(':slug', slug));
 
           dispatch((state) => ({
             ...state,
-            activeCampaign: targetCampaign,
             authentication: {
               ...state.authentication,
               account: json.data.account,
@@ -128,7 +133,7 @@ export default function OnboardingFlow() {
   }, [
     apiFetch,
     dispatch,
-    token,
+    navigate,
     targetCampaign,
     hasSubmitted,
     setHasSubmitted,

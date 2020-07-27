@@ -1,5 +1,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { useNavigate } from '@reach/router';
 import { useApplicationContext } from 'ApplicationContext';
 import {
   CampaignLogo,
@@ -9,6 +10,7 @@ import {
 } from 'components/CampaignStyledComponents';
 import useApiFetch from 'hooks/useApiFetch';
 import useClickOutside from 'hooks/useClickOutside';
+import { DASHBOARD_CAMPAIGN_ROUTE } from 'routes';
 
 const Container = styled.div`
   width: 100%;
@@ -68,6 +70,10 @@ const SelectedCampaignRow = styled(CampaignRow)`
   &:after {
     margin-top: 4px;
     transform: rotate(180deg);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
   }
 `;
 
@@ -132,9 +138,10 @@ const DropdownTitleRow = styled.span`
   }
 `;
 
-export default function CampaignSelector() {
+export default function CampaignSelector(props) {
+  const { activeCampaign } = props;
+
   const {
-    activeCampaign,
     authentication: {
       account,
     },
@@ -142,6 +149,7 @@ export default function CampaignSelector() {
   } = useApplicationContext();
 
   const apiFetch = useApiFetch();
+  const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = React.useState(false);
   const [accountCampaigns, setAccountCampaigns] = React.useState(null);
@@ -236,11 +244,12 @@ export default function CampaignSelector() {
         setTargetCampaign(null);
 
         if (response.status === 200) {
-          localStorage.setItem('lastActiveCampaignId', json.data.campaign.id);
+          const { data: { campaign: { slug } } } = json;
+
+          localStorage.setItem('lastActiveCampaignSlug', slug);
 
           dispatch((state) => ({
             ...state,
-            activeCampaign: json.data.campaign,
             authentication: {
               ...state.authentication,
               account: json.data.account,
@@ -249,6 +258,8 @@ export default function CampaignSelector() {
 
           setAccountCampaigns(null);
           setIsOpen(false);
+
+          navigate(DASHBOARD_CAMPAIGN_ROUTE.replace(':slug', slug));
 
           return;
         }
@@ -268,30 +279,47 @@ export default function CampaignSelector() {
   }, [
     apiFetch,
     dispatch,
+    navigate,
     setTargetCampaign,
     setAccountCampaigns,
     setIsOpen,
     targetCampaign,
   ]);
 
-  function onSwitchCampaign(toCampaign) {
-    localStorage.setItem('lastActiveCampaignId', toCampaign.id);
+  React.useEffect(() => {
+    if (
+      account
+      && accountCampaigns
+      && account.campaigns.length !== accountCampaigns.length
+    ) {
+      setAccountCampaigns(null);
+    }
+  }, [
+    account,
+    accountCampaigns,
+    setAccountCampaigns,
+  ]);
 
+  function onSwitchCampaign(toCampaign) {
+    const { slug } = toCampaign;
+
+    localStorage.setItem('lastActiveCampaignSlug', slug);
+    navigate(DASHBOARD_CAMPAIGN_ROUTE.replace(':slug', slug));
     setIsOpen(false);
-    dispatch((state) => ({ ...state, activeCampaign: toCampaign }));
   }
 
   function onVolunteerForCampaign(toCampaign) {
     setTargetCampaign(toCampaign);
   }
 
-  if (!account) {
-    return null;
+  if (!activeCampaign) {
+    // Places the NavMenu on the right
+    return <div />;
   }
 
   return (
     <Container ref={containerRef}>
-      <SelectedCampaignRow onClick={() => setIsOpen(!isOpen)}>
+      <SelectedCampaignRow disabled={!account} onClick={() => setIsOpen(!isOpen)}>
         <CampaignLogo src={(activeCampaign || {}).logoUrl} />
         <CampaignDetails>
           <CampaignTitle>{(activeCampaign || {}).name}</CampaignTitle>

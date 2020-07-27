@@ -1,6 +1,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
-import { useNavigate } from '@reach/router';
+import { Link, useNavigate } from '@reach/router';
 import NotFoundPage from 'pages/NotFoundPage';
 import AppNav from 'components/AppNav';
 import ActivityFeed from 'components/activity/ActivityFeed';
@@ -14,7 +14,7 @@ import useApiFetch from 'hooks/useApiFetch';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
 import usePrevious from 'hooks/usePrevious';
 import { useApplicationContext } from 'ApplicationContext';
-import { PROFILE_ROUTE } from 'routes';
+import { PROFILE_ROUTE, DASHBOARD_CAMPAIGN_ROUTE } from 'routes';
 
 const Layout = styled.main`
   display: flex;
@@ -488,10 +488,9 @@ export default function ProfilePage(props) {
                       <BioCampaignHeader>Campaigns</BioCampaignHeader>
                       <BioCampaignRow>
                         {account.campaigns.map((campaign) => (
-                          <React.Fragment key={campaign.id}>
-                            {/* TODO: Links to the campaign */}
+                          <Link to={DASHBOARD_CAMPAIGN_ROUTE.replace(':slug', campaign.slug)} key={campaign.id}>
                             <BioCampaignLogo src={campaign.logoUrl} />
-                          </React.Fragment>
+                          </Link>
                         ))}
                       </BioCampaignRow>
                     </BioCampaignContainer>

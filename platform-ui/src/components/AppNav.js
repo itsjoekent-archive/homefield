@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link } from '@reach/router';
 import NavMenu from 'components/NavMenu';
-import { DASHBOARD_ROUTE } from 'routes';
+import { DASHBOARD_DEFAULT_ROUTE } from 'routes';
 import logo from 'assets/logo-name-blue-100.png';
 
 const NavContainer = styled.nav`
@@ -36,7 +36,7 @@ export default function AppNav() {
   return (
     <NavContainer>
       <NavRow>
-        <Link to={DASHBOARD_ROUTE}>
+        <Link to={DASHBOARD_DEFAULT_ROUTE}>
           <Logo src={logo} />
         </Link>
         <NavMenu />

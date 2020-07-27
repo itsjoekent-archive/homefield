@@ -38,7 +38,8 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
 
     [
       require('./routes/get-campaigns'),
-      require('./routes/get-campaigns-by-id'),
+      require('./routes/get-campaign-by-id'),
+      require('./routes/get-campaign-by-slug'),
       require('./routes/create-campaign'),
       require('./routes/delete-campaign'),
 

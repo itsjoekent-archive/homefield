@@ -7,6 +7,7 @@ const endProcessOnFail = require('../utils/endProcessOnFail');
  *
  * @param {ObjectID} _id Unique identifier
  * @param {String} name Campaign name
+ * @param {String} slug Campaign url
  * @param {String} logoUrl URL representing the campaign logo
  * @param {String} location Location this campaign is taking place
  * @param {Array<ObjectID>} admins Account IDs that have full permissions over this campaign
@@ -28,7 +29,7 @@ const endProcessOnFail = require('../utils/endProcessOnFail');
 
 /**
  * Unique Indexes
- * _id
+ * _id, slug
  *
  * Indexes
  * name, createdAt, isPublic
@@ -43,19 +44,33 @@ module.exports = function(db) {
    * @return {Promise}
    */
   async function init() {
+    await collection.createIndex({ slug: 1 }, { unique: true });
+
     await collection.createIndex({ createdAt: 1 });
     await collection.createIndex({ isPublic: 1 });
     await collection.createIndex({ name: 1 });
   }
 
   /**
-   * Get a single campaign
+   * Get a single campaign.
    *
    * @param {ObjectID} _id Campaign id
    * @return {Promise<Campaign|Error>}
    */
   async function getCampaignById(_id) {
     const campaign = await collection.findOne({ _id });
+
+    return campaign;
+  }
+
+  /**
+   * Get a campaign by its unique url.
+   *
+   * @param {String} slug
+   * @return {Promise<Campaign|Error>}
+   */
+  async function getCampaignBySlug(slug) {
+    const campaign = await collection.findOne({ slug });
 
     return campaign;
   }
@@ -114,8 +129,11 @@ module.exports = function(db) {
     location,
     logoUrl,
   ) {
+    const slug = encodeURIComponent(name.toLowerCase().replace(/ /g, '-'));
+
     const data = {
       name,
+      slug,
       location,
       logoUrl,
       admins: [],
@@ -166,6 +184,7 @@ module.exports = function(db) {
 
     init: wrapAsyncFunction(init, endProcessOnFail),
     getCampaignById: wrapAsyncFunction(getCampaignById),
+    getCampaignBySlug: wrapAsyncFunction(getCampaignBySlug),
     getPaginatedCampaigns: wrapAsyncFunction(getPaginatedCampaigns),
     createCampaign: wrapAsyncFunction(createCampaign),
     deleteCampaign: wrapAsyncFunction(deleteCampaign),

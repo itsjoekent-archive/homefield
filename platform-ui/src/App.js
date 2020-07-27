@@ -4,7 +4,8 @@ import { Router } from '@reach/router';
 import ApplicationContext, { defaultApplicationContext } from 'ApplicationContext';
 import theme from 'theme';
 import {
-  DASHBOARD_ROUTE,
+  DASHBOARD_DEFAULT_ROUTE,
+  DASHBOARD_CAMPAIGN_ROUTE,
   FORGOT_PASSWORD_ROUTE,
   LOGIN_ROUTE,
   PROFILE_ROUTE,
@@ -31,7 +32,8 @@ function App() {
       <ThemeProvider theme={theme}>
         <React.Suspense fallback={null}>
           <Router>
-            <DashboardPage path={DASHBOARD_ROUTE} />
+            <DashboardPage path={DASHBOARD_DEFAULT_ROUTE} />
+            <DashboardPage path={DASHBOARD_CAMPAIGN_ROUTE} />
             <ProfilePage path={PROFILE_ROUTE} />
             <LoginPage path={LOGIN_ROUTE} />
             <SignupPage path={SIGNUP_ROUTE} />

@@ -64,7 +64,7 @@ export const LightBlueButton = styled(Button)`
   color: ${({ theme }) => theme.colors.blue.darkest};
   background-color: ${({ theme }) => theme.colors.blue.lightest};
 
-  ${({ loading }) => (!loading || loading === 'false') && css`
+  ${({ loading }) => (!loading || !JSON.parse(loading)) && css`
     &:hover {
       color: ${({ theme }) => theme.colors.mono.white};
       background-color: ${({ theme }) => theme.colors.blue.darkest};
@@ -78,7 +78,7 @@ export const MutedButton = styled(Button)`
   color: ${({ theme }) => theme.colors.mono.black};
   background-color: ${({ theme }) => theme.colors.mono[300]};
 
-  ${({ loading }) => (!loading || loading === 'false') && css`
+  ${({ loading }) => (!loading || !JSON.parse(loading)) && css`
     &:hover {
       color: ${({ theme }) => theme.colors.mono.white};
       background-color: ${({ theme }) => theme.colors.mono[900]};

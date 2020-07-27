@@ -13,6 +13,7 @@ module.exports = function transformCampaign(campaign, authorizer) {
   const {
     _id,
     name,
+    slug,
     logoUrl,
     location,
     owner,
@@ -32,6 +33,7 @@ module.exports = function transformCampaign(campaign, authorizer) {
   const base = {
     id: _id.toString(),
     name,
+    slug,
     logoUrl,
     location,
     dialer,

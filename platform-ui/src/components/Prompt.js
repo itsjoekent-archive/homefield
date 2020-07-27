@@ -77,39 +77,34 @@ export default function Prompt(props) {
     info,
     cancelLabel = 'Cancel',
     confirmLabel = 'Confirm',
-    onClose,
-    onConfirmation,
-    isAsync = false,
+    onClose = () => {},
+    onConfirmation = () => {},
+    isLoading = false,
+    children,
   } = props;
 
   const containerRef = useClickOutside(onClose);
-
-  const [hasSubmitted, setHasSubmitted] = React.useState(false);
-
-  function onClick() {
-    onConfirmation();
-
-    if (isAsync) {
-      setHasSubmitted(true);
-    }
-  }
 
   return ReactDOM.createPortal(
     (
       <Backdrop>
         <Container ref={containerRef}>
-          <CopyArea>
-            {title && <Title>{title}</Title>}
-            {info && <Info>{info}</Info>}
-          </CopyArea>
-          <ButtonRow>
-            <CancelButton onClick={onClose}>
-              {cancelLabel}
-            </CancelButton>
-            <LightBlueButton onClick={onClick} loading={`${hasSubmitted}`}>
-              {confirmLabel}
-            </LightBlueButton>
-          </ButtonRow>
+          {children ? children : (
+            <React.Fragment>
+              <CopyArea>
+                {title && <Title>{title}</Title>}
+                {info && <Info>{info}</Info>}
+              </CopyArea>
+              <ButtonRow>
+                <CancelButton onClick={onClose}>
+                  {cancelLabel}
+                </CancelButton>
+                <LightBlueButton onClick={onConfirmation} loading={`${isLoading}`}>
+                  {confirmLabel}
+                </LightBlueButton>
+              </ButtonRow>
+            </React.Fragment>
+          )}
         </Container>
       </Backdrop>
     ),

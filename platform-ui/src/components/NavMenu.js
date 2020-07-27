@@ -150,7 +150,7 @@ export default function NavMenu() {
         if (response.status === 202) {
           localStorage.removeItem('token');
           localStorage.removeItem('token-expiration');
-          localStorage.removeItem('lastActiveCampaignId');
+          localStorage.removeItem('lastActiveCampaignSlug');
 
           dispatch((state) => ({
             ...state,

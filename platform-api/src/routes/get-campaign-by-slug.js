@@ -7,9 +7,9 @@ const transformCampaign = require('../transformers/transformCampaign');
 module.exports = () => {
   async function handler(req, res) {
     const { db, params, account } = req;
-    const { campaignId } = params;
+    const { slug } = params;
 
-    const result = await Campaign(db).getCampaignById(ObjectID(campaignId));
+    const result = await Campaign(db).getCampaignBySlug(slug);
 
     if (result instanceof Error) {
       throw result;
@@ -27,5 +27,5 @@ module.exports = () => {
     });
   }
 
-  return ['get', '/campaigns/:campaignId', handler, [loadAccount]];
+  return ['get', '/campaigns/slug/:slug', handler, [loadAccount]];
 };

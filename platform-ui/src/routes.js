@@ -1,4 +1,5 @@
-export const DASHBOARD_ROUTE = '/';
+export const DASHBOARD_DEFAULT_ROUTE = '/';
+export const DASHBOARD_CAMPAIGN_ROUTE = '/campaign/:slug';
 
 export const PROFILE_ROUTE = '/profile/:username';
 
