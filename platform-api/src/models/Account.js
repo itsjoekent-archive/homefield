@@ -145,12 +145,24 @@ module.exports = function Account(db) {
    *
    * @param {Account} account
    * @param {String} password
-   * @param {Promise<Boolean|Error}
+   * @return {Promise<Boolean|Error}
    */
   async function comparePassword(account, password) {
     const comparison = await bcrypt.compare(password, account.password);
 
     return comparison;
+  }
+
+  /**
+   * Hash a password with bcrypt.
+   *
+   * @param {String} password
+   * @return {Promise<String|Error>}
+   */
+  async function hashPassword(password) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    return hashedPassword;
   }
 
   return {
@@ -163,5 +175,6 @@ module.exports = function Account(db) {
     createAccount: wrapAsyncFunction(createAccount),
     deleteAccount: wrapAsyncFunction(deleteAccount),
     comparePassword: wrapAsyncFunction(comparePassword),
+    hashPassword: wrapAsyncFunction(hashPassword),
   }
 }

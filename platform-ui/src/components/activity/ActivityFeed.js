@@ -4,6 +4,7 @@ import AccountActivityFeed from 'components/activity/AccountActivityFeed';
 import CampaignActivityFeed from 'components/activity/CampaignActivityFeed';
 import useApiFetch from 'hooks/useApiFetch';
 import usePrevious from 'hooks/usePrevious';
+import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 
 const BlankContainer = styled.div`
   display: flex;
@@ -28,6 +29,8 @@ const Container = styled.div`
 
 export default function Activity(props) {
   const { campaignId, username } = props;
+
+  const { dispatch } = useApplicationContext();
 
   const previousCampaignId = usePrevious(campaignId);
   const previousUsername = usePrevious(username);
@@ -62,6 +65,10 @@ export default function Activity(props) {
   React.useEffect(() => {
     let cancel = false;
 
+    if (apiFetch.hasTrippedCircuit('get activity')) {
+      return;
+    }
+
     async function fetchActivity(path) {
       try {
         const response = await apiFetch(path);
@@ -80,7 +87,8 @@ export default function Activity(props) {
         throw new Error(json.error || 'Failed to load activity');
       } catch (error) {
         console.error(error);
-        // TODO: snack error
+        pushSnackError(dispatch, error);
+        apiFetch.setHasTrippedCircuit('get activity');
       }
     }
 
@@ -96,6 +104,7 @@ export default function Activity(props) {
   }, [
     apiFetch,
     activity,
+    dispatch,
     setActivity,
     campaignId,
     username,

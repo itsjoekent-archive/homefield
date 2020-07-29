@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link } from '@reach/router';
 import { LightBlueButton } from 'components/Buttons';
-import FormController from 'components/forms/FormController';
+import FormController, { resetForm } from 'components/forms/FormController';
 import EmailInput from 'components/forms/EmailInput';
 import PasswordInput from 'components/forms/PasswordInput';
 import SubmitButton from 'components/forms/SubmitButton';
@@ -68,10 +68,8 @@ export default function AccountSettingsForms() {
 
   const apiFetch = useApiFetch();
 
-  const [hasSuccessfullyUpdatedPassword, setHasSuccessfullyUpdatedPassword] = React.useState(false);
-
   async function onPasswordChange(formState) {
-    const { values: { oldPassword, newPassword, confirmNewPassword} } = formState;
+    const { values: { currentPassword, newPassword, confirmNewPassword} } = formState;
 
     if (newPassword !== confirmNewPassword) {
       return {
@@ -81,7 +79,10 @@ export default function AccountSettingsForms() {
 
     const response = await apiFetch('/v1/accounts/password', {
       method: 'post',
-      body: JSON.stringify({ password: newPassword }),
+      body: JSON.stringify({
+        currentPassword,
+        newPassword,
+      }),
     });
 
     const json = await response.json();
@@ -100,12 +101,20 @@ export default function AccountSettingsForms() {
         ...state.authentication,
         token: token.bearer,
       },
+      snacks: [
+        ...state.snacks,
+        {
+          id: Date.now(),
+          type: 'info',
+          message: 'Successfully updated password!',
+        },
+      ],
     }));
 
     localStorage.setItem('token', token.bearer);
     localStorage.setItem('token-expiration', token.expiresAt);
 
-    setHasSuccessfullyUpdatedPassword(true);
+    return resetForm().modifier;
   }
 
   return (
@@ -132,8 +141,8 @@ export default function AccountSettingsForms() {
         </ForgotPasswordLink>
         <FormController formId="password-reset" asyncOnSubmit={onPasswordChange}>
           <PasswordInput
-            fieldIdOverride="oldPassword"
-            labelOverride="Old password"
+            fieldIdOverride="currentPassword"
+            labelOverride="Current password"
           />
           <PasswordInput
             fieldIdOverride="newPassword"

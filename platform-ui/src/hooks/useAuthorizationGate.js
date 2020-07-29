@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from '@reach/router';
-import { useApplicationContext } from 'ApplicationContext';
+import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 import { LOGIN_ROUTE } from 'routes';
 import useApiFetch from 'hooks/useApiFetch';
 
@@ -52,7 +52,7 @@ export default function useAuthorizationGate(redirectOnFail = true) {
         })
         .catch((error) => {
           console.error(error);
-          // TODO: Snack error
+          pushSnackError(dispatch, error);
 
           localStorage.removeItem('token');
 
@@ -69,7 +69,7 @@ export default function useAuthorizationGate(redirectOnFail = true) {
 
     if (!hasValidAuth && !cachedToken) {
       setHasAttempted(true);
-      
+
       if (redirectOnFail) {
         navigate(LOGIN_ROUTE);
       }

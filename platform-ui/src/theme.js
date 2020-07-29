@@ -69,6 +69,7 @@ const theme = {
     dropdown: 90,
     onboarding: 100,
     modal: 110,
+    snacks: 1000,
   },
 };
 

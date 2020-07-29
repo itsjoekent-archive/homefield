@@ -47,6 +47,17 @@ const internalModification = (modifier) => ({
   modifier,
 });
 
+export const resetForm = () => internalModification({
+  values: {},
+  errors: {},
+  focus: {},
+  hasFocusedOnce: {},
+  hasSubmittedOnce: false,
+  hasSubmitted: false,
+  isSubmissionPending: false,
+  formError: null,
+});
+
 function formControllerReducer(state, action) {
   switch (action.type) {
     case SET_FIELD_VALUE: {

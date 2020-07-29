@@ -1,5 +1,3 @@
-const bcrypt = require('bcrypt');
-
 const Account = require('../models/Account');
 const Token = require('../models/Token');
 const loadAccount = require('../middleware/loadAccount');
@@ -15,14 +13,34 @@ module.exports = () => {
       return;
     }
 
-    const { password } = body;
+    const { currentPassword, newPassword } = body;
 
-    if (!password) {
-      res.status(400).json({ error: 'Missing password' });
+    if (!newPassword) {
+      res.status(400).json({ error: 'Missing new password' });
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (!currentPassword) {
+      res.status(400).json({ error: 'Missing current password' });
+      return;
+    }
+
+    const passwordComparison = await Account(db).comparePassword(authenticatedAs, currentPassword);
+
+    if (passwordComparison instanceof Error) {
+      throw passwordComparison;
+    }
+
+    if (!passwordComparison) {
+      res.status(401).json({ error: 'Invalid password' });
+      return;
+    }
+
+    const hashedPassword = await Account(db).hashPassword(newPassword);
+
+    if (hashedPassword instanceof Error) {
+      throw hashedPassword;
+    }
 
     const { value: updatedAccount } = await Account(db).collection.findOneAndUpdate(
       { _id: authenticatedAs._id },

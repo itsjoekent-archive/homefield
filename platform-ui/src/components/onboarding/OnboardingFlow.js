@@ -61,6 +61,10 @@ export default function OnboardingFlow() {
   React.useEffect(() => {
     let cancel = false;
 
+    if (apiFetch.hasTrippedCircuit('get campaigns')) {
+      return;
+    }
+
     async function getCampaigns() {
       try {
         const response = await apiFetch('/v1/campaigns');
@@ -80,6 +84,7 @@ export default function OnboardingFlow() {
       } catch (error) {
         console.error(error);
         setFormError('Encountered unexpected error. Try again?');
+        apiFetch.setHasTrippedCircuit('get campaigns');
       }
     }
 
@@ -124,6 +129,7 @@ export default function OnboardingFlow() {
       } catch (error) {
         console.error(error);
         setFormError('Encountered unexpected error. Try again?');
+        setHasSubmitted(false);
       }
     }
 

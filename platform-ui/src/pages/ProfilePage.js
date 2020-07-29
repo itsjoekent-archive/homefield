@@ -13,7 +13,7 @@ import requiredTextValidator from 'components/forms/requiredTextValidator';
 import useApiFetch from 'hooks/useApiFetch';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
 import usePrevious from 'hooks/usePrevious';
-import { useApplicationContext } from 'ApplicationContext';
+import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 import { PROFILE_ROUTE, DASHBOARD_CAMPAIGN_ROUTE } from 'routes';
 
 const Layout = styled.main`
@@ -240,6 +240,10 @@ export default function ProfilePage(props) {
   React.useEffect(() => {
     let cancel = false;
 
+    if (apiFetch.hasTrippedCircuit('get profile')) {
+      return;
+    }
+
     async function fetchProfileAccount() {
       try {
         const response = await apiFetch(`/v1/accounts/username/${username}`);
@@ -262,7 +266,8 @@ export default function ProfilePage(props) {
         throw new Error(json.error || 'Failed to load profile');
       } catch (error) {
         console.error(error);
-        // TODO: Snack error
+        pushSnackError(dispatch, error);
+        apiFetch.setHasTrippedCircuit('get profile');
       }
     }
 
@@ -273,6 +278,7 @@ export default function ProfilePage(props) {
     return () => cancel = true;
   }, [
     apiFetch,
+    dispatch,
     username,
     account,
     setAccount,
@@ -316,7 +322,8 @@ export default function ProfilePage(props) {
         setHasSubmittedAvatar(false);
       } catch (error) {
         console.error(error);
-        // TODO: Snack error
+        pushSnackError(dispatch, error);
+        setHasSubmittedAvatar(false);
       }
     }
 
@@ -326,6 +333,7 @@ export default function ProfilePage(props) {
   }, [
     account,
     apiFetch,
+    dispatch,
     hasSubmittedAvatar,
     setHasSubmittedAvatar,
     setAccount,

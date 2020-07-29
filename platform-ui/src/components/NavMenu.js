@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from '@reach/router';
-import { useApplicationContext } from 'ApplicationContext';
+import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 import {
   EDIT_ACCOUNT_SETTINGS_ROUTE,
   EDIT_ACCOUNT_CAMPAIGNS_ROUTE,
@@ -174,7 +174,7 @@ export default function NavMenu() {
       })
       .catch((error) => {
         console.error(error);
-        // TODO: Snack error
+        pushSnackError(dispatch, error);
       });
   }
 

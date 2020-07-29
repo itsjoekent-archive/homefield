@@ -1,7 +1,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import { useNavigate } from '@reach/router';
-import { useApplicationContext } from 'ApplicationContext';
 import {
   CampaignLogo,
   CampaignDetails,
@@ -10,6 +9,7 @@ import {
 } from 'components/CampaignStyledComponents';
 import useApiFetch from 'hooks/useApiFetch';
 import useClickOutside from 'hooks/useClickOutside';
+import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 import { DASHBOARD_CAMPAIGN_ROUTE } from 'routes';
 
 const Container = styled.div`
@@ -161,6 +161,10 @@ export default function CampaignSelector(props) {
   React.useEffect(() => {
     let cancel = false;
 
+    if (apiFetch.hasTrippedCircuit('get account campaigns')) {
+      return;
+    }
+
     async function fetchAccountCampaigns() {
       try {
         const response = await apiFetch('/v1/account/campaigns');
@@ -178,7 +182,8 @@ export default function CampaignSelector(props) {
         throw new Error(json.error || 'Failed to load campaigns you have signed up for.');
       } catch (error) {
         console.error(error);
-        // TODO: snack error
+        pushSnackError(dispatch, error);
+        apiFetch.setHasTrippedCircuit('get account campaigns');
       }
     }
 
@@ -192,10 +197,15 @@ export default function CampaignSelector(props) {
     account,
     accountCampaigns,
     setAccountCampaigns,
+    dispatch,
   ]);
 
   React.useEffect(() => {
     let cancel = false;
+
+    if (apiFetch.hasTrippedCircuit('get all campaigns')) {
+      return;
+    }
 
     async function fetchAllCampaigns() {
       try {
@@ -214,7 +224,8 @@ export default function CampaignSelector(props) {
         throw new Error(json.error || 'Failed to load campaigns.');
       } catch (error) {
         console.error(error);
-        // TODO: snack error
+        pushSnackError(dispatch, error);
+        apiFetch.setHasTrippedCircuit('get all campaigns');
       }
     }
 
@@ -227,6 +238,7 @@ export default function CampaignSelector(props) {
     apiFetch,
     allCampaigns,
     setAllCampaigns,
+    dispatch,
   ]);
 
   React.useEffect(() => {
@@ -267,7 +279,8 @@ export default function CampaignSelector(props) {
         throw new Error(json.error || 'Failed to volunteer for campaign.');
       } catch (error) {
         console.error(error);
-        // TODO: snack error
+        pushSnackError(dispatch, error);
+        setTargetCampaign(null);
       }
     }
 

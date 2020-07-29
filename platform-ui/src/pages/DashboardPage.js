@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { Router, useNavigate, useLocation } from '@reach/router';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
 import useApiFetch from 'hooks/useApiFetch';
-import { useApplicationContext } from 'ApplicationContext';
+import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 import OnboardingFlow from 'components/onboarding/OnboardingFlow';
 import CampaignSelector from 'components/dashboard/CampaignSelector';
 import CampaignVolunteerPrompt from 'components/dashboard/CampaignVolunteerPrompt';
@@ -126,6 +126,10 @@ export default function DashboardPage(props) {
 
     async function fetchCampaignAndMakeActive(qualifier, value) {
       try {
+        if (apiFetch.hasTrippedCircuit(`/v1/campaigns/${qualifier}/${value}`)) {
+          return;
+        }
+
         const response = await apiFetch(`/v1/campaigns/${qualifier}/${value}`);
         const json = await response.json();
 
@@ -147,7 +151,8 @@ export default function DashboardPage(props) {
         throw new Error(json.error || 'Failed to load campaign');
       } catch (error) {
         console.error(error);
-        // TODO: snack error
+        pushSnackError(dispatch, error);
+        apiFetch.setHasTrippedCircuit(`/v1/campaigns/${qualifier}/${value}`);
       }
     }
 

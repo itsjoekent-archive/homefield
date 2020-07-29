@@ -10,7 +10,7 @@ import {
 } from 'components/CampaignStyledComponents';
 import { BoldTextButton, CancelButton } from 'components/Buttons';
 import useApiFetch from 'hooks/useApiFetch';
-import { useApplicationContext } from 'ApplicationContext';
+import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 import { DASHBOARD_CAMPAIGN_ROUTE } from 'routes';
 
 const Container = styled.div`
@@ -80,6 +80,10 @@ export default function AccountCampaigns() {
   React.useEffect(() => {
     let cancel = false;
 
+    if (apiFetch.hasTrippedCircuit('get account campaigns')) {
+      return;
+    }
+
     async function fetchAccountCampaigns() {
       try {
         const response = await apiFetch('/v1/account/campaigns');
@@ -97,7 +101,8 @@ export default function AccountCampaigns() {
         throw new Error(json.error || 'Failed to load campaigns you have signed up for.');
       } catch (error) {
         console.error(error);
-        // TODO: snack error
+        pushSnackError(dispatch, error);
+        apiFetch.setHasTrippedCircuit('get account campaigns');
       }
     }
 
@@ -111,6 +116,7 @@ export default function AccountCampaigns() {
     account,
     accountCampaigns,
     setAccountCampaigns,
+    dispatch,
   ]);
 
   React.useEffect(() => {
@@ -144,7 +150,8 @@ export default function AccountCampaigns() {
         throw new Error(json.error || 'Failed to remove the campaign from your account.');
       } catch (error) {
         console.error(error);
-        // TODO: Snack error
+        pushSnackError(dispatch, error);
+        setHasConfirmedLeave(false);
       }
     }
 

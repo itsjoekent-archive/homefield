@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Link, useNavigate } from '@reach/router';
 import Prompt from 'components/Prompt';
-import { LightBlueButton } from 'components/Buttons';
+import { LightBlueButton, BoldTextButton } from 'components/Buttons';
 import FormController from 'components/forms/FormController';
 import EmailInput from 'components/forms/EmailInput';
 import PasswordInput from 'components/forms/PasswordInput';
@@ -10,7 +11,8 @@ import SubmitButton from 'components/forms/SubmitButton';
 import FormErrorMessage from 'components/forms/FormErrorMessage';
 import requiredTextValidator from 'components/forms/requiredTextValidator';
 import useApiFetch from 'hooks/useApiFetch';
-import { useApplicationContext } from 'ApplicationContext';
+import { DASHBOARD_DEFAULT_ROUTE, LOGIN_ROUTE } from 'routes';
+import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 
 const SignupContainer = styled.div`
   padding: 24px;
@@ -19,6 +21,20 @@ const SignupContainer = styled.div`
 const SignupButton = styled(LightBlueButton)`
   margin-left: auto;
   margin-right: auto;
+`;
+
+const LoginButton = styled(BoldTextButton)`
+  display: block;
+  width: fit-content;
+
+  margin-top: 16px;
+  margin-left: auto;
+  margin-right: auto;
+
+  a {
+    text-align: center;
+    color: ${({ theme }) => theme.colors.blue.darkest};
+  }
 `;
 
 const SignupHero = styled.div`
@@ -70,12 +86,18 @@ export default function CampaignVolunteerPrompt(props) {
   const { campaign, onConfirmation } = props;
 
   const apiFetch = useApiFetch();
+  const navigate = useNavigate();
+
   const { authentication: { account }, dispatch } = useApplicationContext();
 
   const [hasConfirmed, setHasConfirmed] = React.useState();
 
   React.useEffect(() => {
     let cancel = false;
+
+    if (apiFetch.hasTrippedCircuit('volunteer for campaign')) {
+      return;
+    }
 
     async function onVolunteerForCampaign() {
       try {
@@ -96,7 +118,8 @@ export default function CampaignVolunteerPrompt(props) {
         throw new Error(json.error || 'Failed to signup for campaign');
       } catch (error) {
         console.error(error);
-        // TODO: snack error
+        pushSnackError(dispatch, error);
+        apiFetch.setHasTrippedCircuit('volunteer for campaign');
       }
     }
 
@@ -107,6 +130,7 @@ export default function CampaignVolunteerPrompt(props) {
     return () => cancel = true;
   }, [
     apiFetch,
+    dispatch,
     campaign,
     hasConfirmed,
     onConfirmation,
@@ -190,9 +214,17 @@ export default function CampaignVolunteerPrompt(props) {
             />
             <FormErrorMessage />
           </FormController>
+          <LoginButton>
+            <Link to={LOGIN_ROUTE}>Log in to existing account</Link>
+          </LoginButton>
         </SignupContainer>
       </Prompt>
     );
+  }
+
+  function onClose() {
+    localStorage.removeItem('lastActiveCampaignSlug');
+    navigate(DASHBOARD_DEFAULT_ROUTE);
   }
 
   return (
@@ -200,7 +232,7 @@ export default function CampaignVolunteerPrompt(props) {
       title={`Sign up to volunteer for ${campaign.name}`}
       info={`Help ${campaign.name} make calls, send texts, and get out the vote!`}
       confirmLabel="Sign up"
-      onCancel={() => {}}
+      onClose={onClose}
       onConfirmation={() => setHasConfirmed(true)}
       isLoading={hasConfirmed}
     />

@@ -2,6 +2,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Router } from '@reach/router';
 import ApplicationContext, { defaultApplicationContext } from 'ApplicationContext';
+import SnackList from 'components/SnackList';
 import theme from 'theme';
 import {
   DASHBOARD_DEFAULT_ROUTE,
@@ -32,18 +33,21 @@ function App() {
   return (
     <ApplicationContext.Provider value={contextValue}>
       <ThemeProvider theme={theme}>
-        <React.Suspense fallback={null}>
-          <Router>
-            <DashboardPage path={DASHBOARD_DEFAULT_ROUTE} />
-            <DashboardPage path={`${DASHBOARD_CAMPAIGN_ROUTE}/*`} />
-            <AccountSettingsPage path={`${EDIT_ACCOUNT_SETTINGS_ROUTE}/*`} />
-            <ProfilePage path={PROFILE_ROUTE} />
-            <LoginPage path={LOGIN_ROUTE} />
-            <SignupPage path={SIGNUP_ROUTE} />
-            <ForgotPasswordPage path={FORGOT_PASSWORD_ROUTE} />
-            <NotFoundPage path="*" />
-          </Router>
-        </React.Suspense>
+        <React.Fragment>
+          <React.Suspense fallback={null}>
+            <Router>
+              <DashboardPage path={DASHBOARD_DEFAULT_ROUTE} />
+              <DashboardPage path={`${DASHBOARD_CAMPAIGN_ROUTE}/*`} />
+              <AccountSettingsPage path={`${EDIT_ACCOUNT_SETTINGS_ROUTE}/*`} />
+              <ProfilePage path={PROFILE_ROUTE} />
+              <LoginPage path={LOGIN_ROUTE} />
+              <SignupPage path={SIGNUP_ROUTE} />
+              <ForgotPasswordPage path={FORGOT_PASSWORD_ROUTE} />
+              <NotFoundPage path="*" />
+            </Router>
+          </React.Suspense>
+          <SnackList />
+        </React.Fragment>
       </ThemeProvider>
     </ApplicationContext.Provider>
   );

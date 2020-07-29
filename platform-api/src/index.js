@@ -78,7 +78,7 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
           req.log.error(error);
 
           res.status(500).json({
-            error: 'Unexpected server error',
+            error: `Unexpected server error, errorId=${errorId}`,
             errorId,
           });
         }

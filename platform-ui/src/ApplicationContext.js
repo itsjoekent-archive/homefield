@@ -5,7 +5,22 @@ export const defaultApplicationContext = {
     account: null,
     token: null,
   },
+  snacks: [],
 };
+
+export function pushSnackError(dispatch, error) {
+  dispatch((copy) => ({
+    ...copy,
+    snacks: [
+      ...copy.snacks,
+      {
+        id: Date.now(),
+        type: 'error',
+        message: error.message,
+      }
+    ],
+  }))
+}
 
 const ApplicationContext = React.createContext(defaultApplicationContext);
 
