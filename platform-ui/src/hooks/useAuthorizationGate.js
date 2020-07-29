@@ -8,6 +8,7 @@ export default function useAuthorizationGate(redirectOnFail = true) {
   const apiFetch = useApiFetch(false);
   const navigate = useNavigate();
 
+  const [hasAttempted, setHasAttempted] = React.useState(false);
   const [hasVerifiedToken, setHasVerifiedToken] = React.useState(false);
 
   const { dispatch, authentication } = useApplicationContext();
@@ -25,6 +26,8 @@ export default function useAuthorizationGate(redirectOnFail = true) {
       });
 
       const json = await response.json();
+
+      setHasAttempted(true);
 
       if (json.error || response.status !== 200) {
         throw new Error(json.error || 'Failed to verify token');
@@ -64,9 +67,15 @@ export default function useAuthorizationGate(redirectOnFail = true) {
   React.useEffect(() => {
     const cachedToken = localStorage.getItem('token');
 
-    if (!hasValidAuth && !cachedToken && redirectOnFail) {
-      navigate(LOGIN_ROUTE);
+    if (!hasValidAuth && !cachedToken) {
+      setHasAttempted(true);
+      
+      if (redirectOnFail) {
+        navigate(LOGIN_ROUTE);
+      }
     }
     // eslint-disable-next-line
   }, []);
+
+  return hasAttempted;
 }

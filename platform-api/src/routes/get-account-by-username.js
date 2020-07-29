@@ -8,9 +8,9 @@ const transformAccount = require('../transformers/transformAccount');
 module.exports = () => {
   async function handler(req, res) {
     const { db, params, account } = req;
-    const { accountId } = params;
+    const { username } = params;
 
-    const result = await Account(db).getAccountById(accountId);
+    const result = await Account(db).getAccountByUsername(username);
 
     if (result instanceof Error) {
       throw result;
@@ -37,5 +37,5 @@ module.exports = () => {
     });
   }
 
-  return ['get', '/accounts/id/:accountId', handler, [loadAccount]];
+  return ['get', '/accounts/username/:username', handler, [loadAccount]];
 };

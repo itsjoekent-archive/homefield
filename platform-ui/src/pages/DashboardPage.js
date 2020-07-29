@@ -1,6 +1,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
-import { useNavigate, useLocation } from '@reach/router';
+import { Router, useNavigate, useLocation } from '@reach/router';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
 import useApiFetch from 'hooks/useApiFetch';
 import { useApplicationContext } from 'ApplicationContext';
@@ -8,6 +8,7 @@ import OnboardingFlow from 'components/onboarding/OnboardingFlow';
 import CampaignSelector from 'components/dashboard/CampaignSelector';
 import CampaignVolunteerPrompt from 'components/dashboard/CampaignVolunteerPrompt';
 import NavMenu from 'components/NavMenu';
+import TabbedNavigation from 'components/TabbedNavigation';
 import ActivityFeed from 'components/activity/ActivityFeed';
 import { DASHBOARD_CAMPAIGN_ROUTE } from 'routes';
 import logo from 'assets/logo-name-blue-100.png';
@@ -37,7 +38,7 @@ const Row = styled.div`
   display: block;
 
   width: 100%;
-  max-width: 1240px;
+  max-width: ${({ theme }) => theme.maxWidth};
 
   margin-left: auto;
   margin-right: auto;
@@ -52,36 +53,6 @@ const NavPlatformRow = styled.div`
   justify-content: space-between;
 
   margin-bottom: 36px;
-`;
-
-const NavTabRow = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
-
-const Tab = styled.a`
-  font-family: ${({ theme }) => theme.font};
-  font-size: ${({ theme }) => theme.type.size.paragraph};
-  font-weight: ${({ theme }) => theme.type.weight.paragraph};
-  text-align: left;
-  color: ${({ theme }) => theme.colors.mono[800]};
-
-  padding-bottom: 4px;
-  margin-right: 24px;
-
-  cursor: pointer;
-  user-select: none;
-
-  border-bottom: 4px solid ${({ theme }) => theme.colors.mono.white};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.blue.dark};
-  }
-
-  ${({ selected }) => selected && css`
-    color: ${({ theme }) => theme.colors.blue.base};
-    border-bottom: 4px solid ${({ theme }) => theme.colors.blue.base};
-  `}
 `;
 
 const MainContainer = styled.main`
@@ -118,22 +89,21 @@ const Logo = styled.img`
   margin-bottom: 24px;
 `;
 
-const ACTIVITY = 'ACTIVITY';
-const PHONEBANK = 'PHONEBANK';
-const SMS = 'SMS';
-const RESOURCES = 'RESOURCES';
+const ACTIVITY = './';
+const PHONEBANK = 'phonebank';
+const SMS = 'sms';
+const RESOURCES = 'resources';
 
 export default function DashboardPage(props) {
   const { slug } = props;
 
-  useAuthorizationGate(false);
+  const hasAttemptedAuthorization = useAuthorizationGate(false);
 
   const {
     authentication: { account },
     dispatch,
   } = useApplicationContext();
 
-  const [activeTab, setActiveTab] = React.useState(ACTIVITY);
   const [activeCampaign, setActiveCampaign] = React.useState(null);
 
   const apiFetch = useApiFetch();
@@ -166,6 +136,11 @@ export default function DashboardPage(props) {
         if (response.status === 200) {
           localStorage.setItem('lastActiveCampaignSlug', json.data.campaign.slug);
           setActiveCampaign(json.data.campaign);
+
+          if (!slug || slug !== json.data.campaign.slug) {
+            navigate(DASHBOARD_CAMPAIGN_ROUTE.replace(':slug', json.data.campaign.slug));
+          }
+
           return;
         }
 
@@ -194,25 +169,29 @@ export default function DashboardPage(props) {
     activeCampaign,
     apiFetch,
     dispatch,
+    navigate,
     setActiveCampaign,
     slug,
   ]);
 
   React.useEffect(() => {
     if (activeCampaign) {
-      const targetUrl = DASHBOARD_CAMPAIGN_ROUTE.replace(':slug', activeCampaign.slug);
+      const compareUrl = DASHBOARD_CAMPAIGN_ROUTE.replace(':slug', activeCampaign.slug);
 
-      if (location.pathname !== targetUrl) {
-        navigate(targetUrl);
+      if (!location.pathname.startsWith(compareUrl)) {
+        setActiveCampaign(null);
       }
     }
   }, [
     activeCampaign,
+    setActiveCampaign,
     location,
     navigate,
   ]);
 
-  function onPromptConfirmation(account) {
+  function onPromptConfirmation(account, campaign) {
+    setActiveCampaign(campaign);
+
     dispatch((state) => ({
       ...state,
       authentication: {
@@ -238,7 +217,7 @@ export default function DashboardPage(props) {
           onConfirmation={onPromptConfirmation}
         />
       )}
-      {!account && (
+      {!account && hasAttemptedAuthorization && (
         <CampaignVolunteerPrompt
           campaign={activeCampaign}
           onConfirmation={onPromptConfirmation}
@@ -252,33 +231,25 @@ export default function DashboardPage(props) {
           </NavPlatformRow>
         </Row>
         <Row>
-          <NavTabRow>
-            {tabs.map((tab) => (
-              <Tab
-                key={tab[0]}
-                selected={tab[0] === activeTab}
-                onClick={() => setActiveTab(tab[0])}
-                role="button"
-                tabIndex="0"
-                onKeyDown={(event) => (event.keyCode === 32 || event.keyCode === 13) && setActiveTab(tab[0])}
-              >
-                {tab[1]}
-              </Tab>
-            ))}
-          </NavTabRow>
+          <TabbedNavigation tabs={tabs} />
         </Row>
       </NavContainer>
       <MainContainer>
         <Row>
-          {activeTab === ACTIVITY && (
-            <ActivityFeed campaignId={activeCampaign && activeCampaign.id} />
-          )}
-          {activeTab === PHONEBANK && !!account && (
-            <Frame src={activeCampaign && activeCampaign.dialer.iframe} />
-          )}
-          {activeTab === SMS && !!account && (
-            <Frame src={activeCampaign && activeCampaign.sms.iframe} />
-          )}
+          <Router>
+            <ActivityFeed
+              path="/"
+              campaignId={activeCampaign && activeCampaign.id}
+            />
+            <Frame
+              path={PHONEBANK}
+              src={!!activeCampaign && !!account && activeCampaign.dialer.iframe}
+            />
+            <Frame
+              path={SMS}
+              src={!!activeCampaign && !!account && activeCampaign.sms.iframe}
+            />
+          </Router>
         </Row>
       </MainContainer>
       <Logo src={logo} />

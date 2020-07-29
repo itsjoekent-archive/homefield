@@ -40,6 +40,7 @@ const theme = {
     },
   },
   font: 'sofia-pro, sans-serif',
+  maxWidth: '1240px',
   shadow: {
     light: '0px 0px 5px 0px rgba(0,0,0,0.3)',
     strong: '0px 1px 13px 2px rgba(0,0,0,0.5)',

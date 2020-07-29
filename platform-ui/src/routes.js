@@ -3,7 +3,7 @@ export const DASHBOARD_CAMPAIGN_ROUTE = '/campaign/:slug';
 
 export const PROFILE_ROUTE = '/profile/:username';
 
-export const EDIT_ACCOUNT_SETTINGS_ROUTE = '/settings/profile';
+export const EDIT_ACCOUNT_SETTINGS_ROUTE = '/settings';
 export const EDIT_ACCOUNT_CAMPAIGNS_ROUTE = '/settings/campaigns';
 
 export const LOGIN_ROUTE = '/login';

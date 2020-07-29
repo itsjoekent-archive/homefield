@@ -6,12 +6,14 @@ import theme from 'theme';
 import {
   DASHBOARD_DEFAULT_ROUTE,
   DASHBOARD_CAMPAIGN_ROUTE,
+  EDIT_ACCOUNT_SETTINGS_ROUTE,
   FORGOT_PASSWORD_ROUTE,
   LOGIN_ROUTE,
   PROFILE_ROUTE,
   SIGNUP_ROUTE,
 } from 'routes';
 
+const AccountSettingsPage = React.lazy(() => import('pages/AccountSettingsPage'));
 const DashboardPage = React.lazy(() => import('pages/DashboardPage'));
 const ForgotPasswordPage = React.lazy(() => import('pages/ForgotPasswordPage'));
 const LoginPage = React.lazy(() => import('pages/LoginPage'));
@@ -33,7 +35,8 @@ function App() {
         <React.Suspense fallback={null}>
           <Router>
             <DashboardPage path={DASHBOARD_DEFAULT_ROUTE} />
-            <DashboardPage path={DASHBOARD_CAMPAIGN_ROUTE} />
+            <DashboardPage path={`${DASHBOARD_CAMPAIGN_ROUTE}/*`} />
+            <AccountSettingsPage path={`${EDIT_ACCOUNT_SETTINGS_ROUTE}/*`} />
             <ProfilePage path={PROFILE_ROUTE} />
             <LoginPage path={LOGIN_ROUTE} />
             <SignupPage path={SIGNUP_ROUTE} />

@@ -22,7 +22,7 @@ const Layout = styled.main`
   justify-content: space-between;
 
   width: 100%;
-  max-width: 1240px;
+  max-width: ${({ theme }) => theme.maxWidth};
 
   margin-left: auto;
   margin-right: auto;
@@ -62,6 +62,10 @@ const Avatar = styled.img`
   display: block;
   width: 100%;
   max-width: 256px;
+  max-height: 256px;
+
+  object-fit: cover;
+  object-position: center;
 
   border-radius: 50%;
   border: 4px solid ${({ theme }) => theme.colors.blue.base};
@@ -238,7 +242,7 @@ export default function ProfilePage(props) {
 
     async function fetchProfileAccount() {
       try {
-        const response = await apiFetch(`/v1/accounts/${username}`);
+        const response = await apiFetch(`/v1/accounts/username/${username}`);
         const json = await response.json();
 
         if (cancel) {

@@ -57,28 +57,27 @@ export default function SignupPage() {
 
     const json = await response.json();
 
-    if (json && json.error) {
+    if (response.status !== 200) {
       return {
-        formError: json.error,
-      };
+        formError: json.error || 'Failed to signup',
+      }
     }
 
-    if (response.status === 200) {
-      const { data: { account, token } } = json;
+    const { data: { account, token } } = json;
 
-      dispatch((state) => ({
-        ...state,
+    dispatch((state) => ({
+      ...state,
+      authentication: {
+        ...state.authentication,
         account,
         token: token.bearer,
-      }));
+      },
+    }));
 
-      localStorage.setItem('token', token.bearer);
-      localStorage.setItem('token-expiration', token.expiresAt);
+    localStorage.setItem('token', token.bearer);
+    localStorage.setItem('token-expiration', token.expiresAt);
 
-      navigate(DASHBOARD_DEFAULT_ROUTE);
-
-      return;
-    }
+    navigate(DASHBOARD_DEFAULT_ROUTE);
   }
 
   return (

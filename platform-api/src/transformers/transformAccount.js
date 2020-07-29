@@ -28,7 +28,6 @@ module.exports = function transformAccount(account, authorizer) {
 
   const base = {
     id: _id.toString(),
-    email,
     username,
     firstName,
     lastName,
@@ -45,6 +44,13 @@ module.exports = function transformAccount(account, authorizer) {
     isBanned,
     createdAt,
   };
+
+  if (!!authorizer && base.id === authorizer._id.toString()) {
+    return {
+      ...base,
+      email,
+    }
+  }
 
   return base;
 }

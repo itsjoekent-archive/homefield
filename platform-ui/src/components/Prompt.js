@@ -56,7 +56,8 @@ const Title = styled.h1`
   font-size: ${({ theme }) => theme.type.size.header};
   font-weight: ${({ theme }) => theme.type.weight.header};;
   text-align: left;
-  color: ${({ theme }) => theme.colors.blue.base};
+  color: ${({ theme }) => theme.colors.blue.darkest};
+  line-height: 1.2;
 
   margin-bottom: 24px;
 `;

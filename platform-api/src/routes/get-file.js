@@ -1,3 +1,4 @@
+const ms = require('ms');
 const { GridFSBucket } = require('mongodb');
 
 module.exports = (db) => {
@@ -15,6 +16,7 @@ module.exports = (db) => {
       }
 
       res.setHeader('Content-Type', file.contentType);
+      res.setHeader('Cache-Control', `max-age=${ms('1 year') / 1000}`);
 
       bucket.openDownloadStreamByName(filename)
         .pipe(res)

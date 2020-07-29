@@ -17,6 +17,11 @@ export const Avatar = styled.img`
   display: block;
   width: 64px;
   height: 64px;
+  max-width: 64px;
+  max-height: 64px;
+
+  object-fit: cover;
+  object-position: center;
 
   border-radius: 50%;
   ${({ isProfile, theme }) => isProfile && css`

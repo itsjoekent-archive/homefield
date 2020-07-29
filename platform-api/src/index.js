@@ -47,13 +47,16 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
       require('./routes/get-account-activity'),
 
       require('./routes/volunteer'),
+      require('./routes/stop-volunteering'),
 
       require('./routes/get-account-campaigns'),
       require('./routes/get-account-by-id'),
+      require('./routes/get-account-by-username'),
 
       require('./routes/create-account'),
       require('./routes/edit-account'),
       require('./routes/edit-account-avatar'),
+      require('./routes/edit-account-password'),
       require('./routes/login'),
       require('./routes/logout'),
       require('./routes/token-verify'),

@@ -61,6 +61,9 @@ const Avatar = styled.div`
   img {
     width: 100%;
     height: 100%;
+
+    object-fit: cover;
+    object-position: center;
   }
 `;
 
@@ -76,6 +79,7 @@ const Dropdown = styled.div`
   width: 180px;
   position: absolute;
   top: 72px;
+  right: 0;
   z-index: ${({ theme }) => theme.zIndex.dropdown};
 
   border: 1px solid ${({ theme }) => theme.colors.mono[400]};
@@ -196,13 +200,13 @@ export default function NavMenu() {
               </Link>
             </DropdownLink>
             <DropdownLink>
-              <Link to={EDIT_ACCOUNT_CAMPAIGNS_ROUTE}>
-                Your Campaigns
+              <Link to={EDIT_ACCOUNT_SETTINGS_ROUTE}>
+                Account Settings
               </Link>
             </DropdownLink>
             <DropdownLink>
-              <Link to={EDIT_ACCOUNT_SETTINGS_ROUTE}>
-                Account Settings
+              <Link to={EDIT_ACCOUNT_CAMPAIGNS_ROUTE}>
+                Your Campaigns
               </Link>
             </DropdownLink>
             <DropdownLink danger>

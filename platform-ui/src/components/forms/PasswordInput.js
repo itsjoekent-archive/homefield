@@ -2,13 +2,17 @@ import React from 'react';
 import TextInput from 'components/forms/TextInput';
 import requiredTextValidator from 'components/forms/requiredTextValidator';
 
-export default function PasswordInput() {
+export default function PasswordInput(props) {
+  const { fieldIdOverride, labelOverride } = props;
+
+  const fieldId = fieldIdOverride || "password";
+
   return (
     <TextInput
-      fieldId="password"
-      label="Password"
+      fieldId={fieldId}
+      label={labelOverride || "Password"}
       htmlType="password"
-      onValueChange={requiredTextValidator('password', 'Password', 6)}
+      onValueChange={requiredTextValidator(fieldId, 'Password', 6)}
     />
   );
 }

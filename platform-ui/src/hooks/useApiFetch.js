@@ -15,7 +15,7 @@ export default function useApiFetch(authenticate = true, contentType = 'applicat
       options.headers['Content-Type'] = contentType;
     }
 
-    if (authenticate) {
+    if (authenticate && token) {
       options.headers['Authorization'] = `Bearer ${token}`;
     }
 
