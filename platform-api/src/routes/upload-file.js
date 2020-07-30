@@ -43,7 +43,7 @@ module.exports = () => {
     const bucket = new GridFSBucket(db, { bucketName: 'uploads' });
     const writeStream = bucket.openUploadStream(filename, { contentType: mimetype });
 
-    const url = `${process.env.HOST}/files/${filename}`;
+    const url = `${process.env.API_HOST}/files/${filename}`;
 
     fs.createReadStream(path)
       .pipe(writeStream)

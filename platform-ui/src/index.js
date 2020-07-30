@@ -1,3 +1,5 @@
+import 'url-search-params-polyfill';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';

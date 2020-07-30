@@ -65,8 +65,11 @@ export default function LoginPage() {
 
       dispatch((state) => ({
         ...state,
-        account,
-        token: token.bearer,
+        authentication: {
+          ...state.authentication,
+          account,
+          token: token.bearer,
+        },
       }));
 
       localStorage.setItem('token', token.bearer);

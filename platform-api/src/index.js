@@ -60,6 +60,8 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
       require('./routes/login'),
       require('./routes/logout'),
       require('./routes/token-verify'),
+      require('./routes/trigger-password-reset'),
+      require('./routes/reset-account-password'),
 
       require('./routes/upload-file'),
     ].forEach((route) => {
@@ -67,7 +69,7 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
 
       async function handlerWrapper(req, res) {
         function onError(error) {
-          const errorId = crypto.randomBytes(64).toString('hex');
+          const errorId = crypto.randomBytes(16).toString('hex');
 
           if (!error.message) {
             error.message = '';

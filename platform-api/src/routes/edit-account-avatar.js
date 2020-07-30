@@ -9,7 +9,7 @@ module.exports = () => {
     const { body, db, account: authenticatedAs } = req;
 
     if (!authenticatedAs) {
-      res.status(400).json({ error: 'Cannot edit an account while not logged in' });
+      res.status(401).json({ error: 'Cannot edit an account while not logged in' });
       return;
     }
 
@@ -32,7 +32,7 @@ module.exports = () => {
       { _id: authenticatedAs._id },
       {
         '$set': {
-          avatarUrl: `${process.env.HOST}/files/${filename}`,
+          avatarUrl: `${process.env.API_HOST}/files/${filename}`,
           updatedAt: Date.now(),
         },
       },

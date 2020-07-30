@@ -23,6 +23,8 @@ const { DEFAULT_USER_ROLE } = require('../utils/accountRoles');
  * @param {Array<String>} campaigns List of campaigns this account is volunteering for
  * @param {Boolean} isBanned Flag indicting if this account has been banned
  * @param {String} role Platform account role
+ * @param {String} resetToken Random token used when resetting auth credentials for this account
+ * @param {Date} resetTokenExpiration Time the reset token has expired
  * @param {Date} createdAt Time this account was created
  * @param {Date} updatedAt Time this acount was last updated at
  */
@@ -118,6 +120,8 @@ module.exports = function Account(db) {
       campaigns: [],
       isBanned: false,
       role: DEFAULT_USER_ROLE,
+      resetToken: null,
+      resetTokenExpiration: null,
       createdAt: createdAt,
       updatedAt: createdAt,
     };
@@ -165,6 +169,20 @@ module.exports = function Account(db) {
     return hashedPassword;
   }
 
+  /**
+   * Compare the reset tokens and if the reset token has expired.
+   *
+   * @param {Account} account
+   * @param {String} resetToken
+   * @return {Promise<Boolean|Error>}
+   */
+  async function checkResetToken(account, resetToken) {
+    const comparison = await bcrypt.compare(resetToken, account.resetToken);
+    const hasResetTokenExpired = comparison.resetTokenExpiration && comparison.resetTokenExpiration < Date.now();
+
+    return comparison && !hasResetTokenExpired;
+  }
+
   return {
     collection,
 
@@ -176,5 +194,6 @@ module.exports = function Account(db) {
     deleteAccount: wrapAsyncFunction(deleteAccount),
     comparePassword: wrapAsyncFunction(comparePassword),
     hashPassword: wrapAsyncFunction(hashPassword),
+    checkResetToken: wrapAsyncFunction(checkResetToken),
   }
 }
