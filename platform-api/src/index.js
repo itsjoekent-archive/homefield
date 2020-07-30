@@ -57,6 +57,7 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
       require('./routes/edit-account'),
       require('./routes/edit-account-avatar'),
       require('./routes/edit-account-password'),
+      require('./routes/edit-account-email'),
       require('./routes/login'),
       require('./routes/logout'),
       require('./routes/token-verify'),

@@ -42,6 +42,8 @@ module.exports = () => {
       throw hashedPassword;
     }
 
+    // TODO: Send notification
+
     const { value: updatedAccount } = await Account(db).collection.findOneAndUpdate(
       { _id: authenticatedAs._id },
       {

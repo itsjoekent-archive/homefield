@@ -1,11 +1,5 @@
-const crypto = require('crypto');
-const { promisify } = require('util');
-const ms = require('ms');
-
 const Account = require('../models/Account');
 const mail = require('../mail');
-
-const randomBytes = promisify(crypto.randomBytes);
 
 module.exports = () => {
   async function handler(req, res) {
@@ -29,24 +23,13 @@ module.exports = () => {
       return;
     }
 
-    const resetTokenBuffer = await randomBytes(16);
-    const resetToken = resetTokenBuffer.toString('hex');
-    const resetTokenHashed = await Account(db).hashPassword(resetToken);
+    const result = await Account(db).generateResetToken(existingAccount);
 
-    if (resetTokenHashed instanceof Error) {
-      throw resetTokenHashed;
+    if (result instanceof Error) {
+      throw result;
     }
 
-    const { value: updatedAccount } = await Account(db).collection.findOneAndUpdate(
-      { _id: existingAccount._id },
-      {
-        '$set': {
-          resetToken: resetTokenHashed,
-          resetTokenExpiration: Date.now() + ms('2 hours'),
-        },
-      },
-      { returnOriginal: false },
-    );
+    const [resetToken, updatedAccount] = result;
 
     const mailResult = await mail(existingAccount.email, 'forgot-password', { account: updatedAccount, resetToken });
 

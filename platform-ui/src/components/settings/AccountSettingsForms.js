@@ -68,6 +68,50 @@ export default function AccountSettingsForms() {
 
   const apiFetch = useApiFetch();
 
+  async function onEmailChange(formState) {
+    const { values: { email, password } } = formState;
+
+    const response = await apiFetch('/v1/accounts/email', {
+      method: 'post',
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
+
+    const json = await response.json();
+
+    if (response.status !== 200) {
+      return {
+        formError: json.error || 'Failed to update email',
+      }
+    }
+
+    const { data: { account, token } } = json;
+
+    dispatch((state) => ({
+      ...state,
+      authentication: {
+        ...state.authentication,
+        token: token.bearer,
+        account,
+      },
+      snacks: [
+        ...state.snacks,
+        {
+          id: Date.now(),
+          type: 'info',
+          message: 'Successfully updated email!',
+        },
+      ],
+    }));
+
+    localStorage.setItem('token', token.bearer);
+    localStorage.setItem('token-expiration', token.expiresAt);
+
+    return resetForm().modifier;
+  }
+
   async function onPasswordChange(formState) {
     const { values: { currentPassword, newPassword, confirmNewPassword} } = formState;
 
@@ -124,8 +168,9 @@ export default function AccountSettingsForms() {
         {account && (
           <Paragraph>Current email address is <EmailPlaceholder>{account.email}</EmailPlaceholder></Paragraph>
         )}
-        <FormController formId="email-reset">
+        <FormController formId="email-reset" asyncOnSubmit={onEmailChange}>
           <EmailInput />
+          <PasswordInput />
           <SubmitButton
             renderButton={(buttonProps) => (
               <LightBlueButton {...buttonProps}>Update email</LightBlueButton>

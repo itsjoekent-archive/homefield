@@ -1,7 +1,11 @@
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const ms = require('ms');
+const { promisify } = require('util');
 const { createCanvas } = require('canvas');
 const { hashicon } = require('@emeraldpay/hashicon');
+
+const randomBytes = promisify(crypto.randomBytes);
 
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 const endProcessOnFail = require('../utils/endProcessOnFail');
@@ -170,6 +174,36 @@ module.exports = function Account(db) {
   }
 
   /**
+   * Generate a reset token for this account.
+   *
+   * @param {Account} account
+   * @return {Promise<[Account,String]|Error>}
+   */
+  async function generateResetToken(account) {
+    const resetTokenBuffer = await randomBytes(16);
+    const resetToken = resetTokenBuffer.toString('hex');
+
+    const resetTokenHashed = await hashPassword(resetToken);
+
+    if (resetTokenHashed instanceof Error) {
+      return resetTokenHashed;
+    }
+
+    const { value: updatedAccount } = await collection.findOneAndUpdate(
+      { _id: account._id },
+      {
+        '$set': {
+          resetToken: resetTokenHashed,
+          resetTokenExpiration: Date.now() + ms('2 hours'),
+        },
+      },
+      { returnOriginal: false },
+    );
+
+    return [resetToken, updatedAccount];
+  }
+
+  /**
    * Compare the reset tokens and if the reset token has expired.
    *
    * @param {Account} account
@@ -194,6 +228,7 @@ module.exports = function Account(db) {
     deleteAccount: wrapAsyncFunction(deleteAccount),
     comparePassword: wrapAsyncFunction(comparePassword),
     hashPassword: wrapAsyncFunction(hashPassword),
+    generateResetToken: wrapAsyncFunction(generateResetToken),
     checkResetToken: wrapAsyncFunction(checkResetToken),
   }
 }
