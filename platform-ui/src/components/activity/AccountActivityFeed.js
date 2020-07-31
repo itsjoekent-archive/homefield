@@ -31,7 +31,7 @@ export default function AccountActivityFeed(props) {
             case 'calls':
               return (
                 <ActivityDescription>
-                  {item.account.firstName} made <ActivityDescriptionHighlight>{item.value}</ActivityDescriptionHighlight> calls for the {item.campaign.name} campaign!
+                  {item.account.firstName} made <ActivityDescriptionHighlight>{item.value} calls</ActivityDescriptionHighlight> for the {item.campaign.name} campaign!
                 </ActivityDescription>
               );
             default:

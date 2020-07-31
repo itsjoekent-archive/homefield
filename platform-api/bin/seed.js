@@ -5,6 +5,8 @@ const Account = require('../src/models/Account');
 const Activity = require('../src/models/Activity');
 const Campaign = require('../src/models/Campaign');
 
+const seedWiki = require('./seed-wiki');
+
 (async function seed() {
   try {
     console.log('Running seed script');
@@ -76,8 +78,38 @@ const Campaign = require('../src/models/Campaign');
 
     await Promise.all(campaigns.map((campaign) => db.collection('campaigns').findOneAndUpdate(
       { _id: campaign._id },
-      { '$set': { isPublic: true } },
+      {
+        '$set': {
+          isPublic: true,
+          wiki: seedWiki,
+        },
+      },
     )));
+
+    await db.collection('campaigns').findOneAndUpdate(
+      { _id: campaigns[0]._id },
+      {
+        '$set': {
+          dialer: {
+            iframe: 'https://www.thrutalk.io/caller/login/vfh2020nc',
+          },
+          firewall: [
+            campaigns[2]._id,
+          ],
+        },
+      },
+    );
+
+    await db.collection('campaigns').findOneAndUpdate(
+      { _id: campaigns[2]._id },
+      {
+        '$set': {
+          firewall: [
+            campaigns[0]._id,
+          ],
+        },
+      },
+    );
 
     console.log('Seeding volunteer accounts...');
 

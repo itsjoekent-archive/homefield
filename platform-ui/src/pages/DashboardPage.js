@@ -7,6 +7,7 @@ import OnboardingFlow from 'components/onboarding/OnboardingFlow';
 import CampaignSelector from 'components/dashboard/CampaignSelector';
 import Phonebank from 'components/dashboard/Phonebank';
 import Sms from 'components/dashboard/Sms';
+import Wiki from 'components/dashboard/Wiki';
 import CampaignVolunteerPrompt from 'components/dashboard/CampaignVolunteerPrompt';
 import NavMenu from 'components/NavMenu';
 import TabbedNavigation from 'components/TabbedNavigation';
@@ -266,6 +267,7 @@ export default function DashboardPage(props) {
               setIsPartying={setIsPartying}
             />
             <Sms path={SMS} campaign={activeCampaign} />
+            <Wiki path={RESOURCES} campaign={activeCampaign} />
           </Router>
         </Row>
         <ConfettiContainer>
