@@ -45,9 +45,8 @@ export const ActivityDescription = styled.p`
 export const ActivityDescriptionHighlight = styled.span`
   font-family: ${({ theme }) => theme.font};
   font-size: ${({ theme }) => theme.type.size.paragraph};
-  font-weight:${({ theme }) => theme.type.weight.paragraph};
-  text-align: left;
-  color: ${({ theme }) => theme.colors.blue.black};
+  font-weight: 800;
+  color: ${({ theme }) => theme.colors.blue.base};
 `;
 
 export const ActivityTimestamp = styled.p`

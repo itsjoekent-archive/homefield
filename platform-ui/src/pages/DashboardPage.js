@@ -1,11 +1,14 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import Confetti from 'react-confetti';
 import { Router, useNavigate, useLocation } from '@reach/router';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
 import useApiFetch from 'hooks/useApiFetch';
 import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 import OnboardingFlow from 'components/onboarding/OnboardingFlow';
 import CampaignSelector from 'components/dashboard/CampaignSelector';
+import Phonebank from 'components/dashboard/Phonebank';
+import Sms from 'components/dashboard/Sms';
 import CampaignVolunteerPrompt from 'components/dashboard/CampaignVolunteerPrompt';
 import NavMenu from 'components/NavMenu';
 import TabbedNavigation from 'components/TabbedNavigation';
@@ -59,26 +62,25 @@ const MainContainer = styled.main`
   display: flex;
   flex-direction: column;
 
+  position: relative;
+
   padding-top: 36px;
   padding-bottom: 36px;
 
   background-color: ${({ theme }) => theme.colors.mono.white};
 
   border-bottom: 1px solid ${({ theme }) => theme.colors.mono[400]};
+
+  z-index: 1;
 `;
 
-const Frame = styled.iframe`
+const ConfettiContainer = styled.div`
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
   width: 100%;
-  min-height: 80vh;
-
-  border: none;
-
-  ${({ src }) => !src && css`
-    background: linear-gradient(to right, #000 33%, #fff 0%) top/10px 1px repeat-x,
-                linear-gradient(#000 33%, #fff 0%) right/1px 10px repeat-y,
-                linear-gradient(to right, #000 33%, #fff 0%) bottom/10px 1px repeat-x,
-                linear-gradient(#000 33%, #fff 0%) left/1px 10px repeat-y;
-  `}
+  height: 100%;
 `;
 
 const Logo = styled.img`
@@ -105,6 +107,8 @@ export default function DashboardPage(props) {
   } = useApplicationContext();
 
   const [activeCampaign, setActiveCampaign] = React.useState(null);
+
+  const [isPartying, setIsPartying] = React.useState(false);
 
   const apiFetch = useApiFetch();
   const navigate = useNavigate();
@@ -242,20 +246,23 @@ export default function DashboardPage(props) {
       <MainContainer>
         <Row>
           <Router>
-            <ActivityFeed
-              path="/"
-              campaignId={activeCampaign && activeCampaign.id}
-            />
-            <Frame
+            <ActivityFeed path="/" campaignId={activeCampaign && activeCampaign.id} />
+            <Phonebank
               path={PHONEBANK}
-              src={!!activeCampaign && !!account && activeCampaign.dialer.iframe}
+              campaign={activeCampaign}
+              isPartying={isPartying}
+              setIsPartying={setIsPartying}
             />
-            <Frame
-              path={SMS}
-              src={!!activeCampaign && !!account && activeCampaign.sms.iframe}
-            />
+            <Sms path={SMS} campaign={activeCampaign} />
           </Router>
         </Row>
+        <ConfettiContainer>
+          <Confetti
+            recycle={false}
+            run={isPartying}
+            onConfettiComplete={() => setIsPartying(false)}
+          />
+        </ConfettiContainer>
       </MainContainer>
       <Logo src={logo} />
     </PageContainer>

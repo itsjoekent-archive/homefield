@@ -22,10 +22,18 @@ module.exports = function transformActivity(activity, authorizer) {
     createdAt,
   } = activity;
 
+  const transformedAccount = Array.isArray(account)
+    ? transformAccount(account[0], authorizer)
+    : transformAccount(account);
+
+  const transformedCampaign = Array.isArray(campaign)
+    ? transformCampaign(campaign[0], authorizer)
+    : transformCampaign(campaign, authorizer);
+
   return {
     id: _id.toString(),
-    account: transformAccount(account[0], authorizer),
-    campaign: transformCampaign(campaign[0], authorizer),
+    account: transformedAccount,
+    campaign: transformedCampaign,
     type,
     value,
     createdAt,

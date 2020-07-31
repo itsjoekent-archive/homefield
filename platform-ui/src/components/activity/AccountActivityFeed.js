@@ -6,6 +6,7 @@ import {
   ActivityDetails,
   Avatar,
   ActivityDescription,
+  ActivityDescriptionHighlight,
   ActivityTimestamp,
 } from 'components/activity/ActivityStyledComponents';
 import { DASHBOARD_CAMPAIGN_ROUTE } from 'routes';
@@ -25,6 +26,12 @@ export default function AccountActivityFeed(props) {
               return (
                 <ActivityDescription>
                   {item.account.firstName} joined the {item.campaign.name} campaign.
+                </ActivityDescription>
+              );
+            case 'calls':
+              return (
+                <ActivityDescription>
+                  {item.account.firstName} made <ActivityDescriptionHighlight>{item.value}</ActivityDescriptionHighlight> calls for the {item.campaign.name} campaign!
                 </ActivityDescription>
               );
             default:
