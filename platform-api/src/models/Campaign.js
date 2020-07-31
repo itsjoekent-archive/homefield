@@ -129,7 +129,8 @@ module.exports = function(db) {
     location,
     logoUrl,
   ) {
-    const slug = encodeURIComponent(name.toLowerCase().replace(/ /g, '-'));
+    const slugify = (text) => encodeURIComponent(text.toLowerCase().replace(/ /g, '-'))
+    const slug = `${slugify(name)}-${slugify(location)}`;
 
     const data = {
       name,

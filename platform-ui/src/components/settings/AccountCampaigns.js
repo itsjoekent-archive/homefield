@@ -127,6 +127,10 @@ export default function AccountCampaigns() {
         const response = await apiFetch(`/v1/campaigns/${leaveTarget.id}/volunteer`, { method: 'delete' });
         const json = await response.json();
 
+        if (localStorage.getItem('lastActiveCampaignSlug') === leaveTarget.slug) {
+          localStorage.removeItem('lastActiveCampaignSlug');
+        }
+
         if (cancel) {
           return;
         }

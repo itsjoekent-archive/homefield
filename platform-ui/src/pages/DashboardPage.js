@@ -2,9 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import Confetti from 'react-confetti';
 import { Router, useNavigate, useLocation } from '@reach/router';
-import useAuthorizationGate from 'hooks/useAuthorizationGate';
-import useApiFetch from 'hooks/useApiFetch';
-import { useApplicationContext, pushSnackError } from 'ApplicationContext';
+import NotFoundPage from 'pages/NotFoundPage';
 import OnboardingFlow from 'components/onboarding/OnboardingFlow';
 import CampaignSelector from 'components/dashboard/CampaignSelector';
 import Phonebank from 'components/dashboard/Phonebank';
@@ -13,7 +11,10 @@ import CampaignVolunteerPrompt from 'components/dashboard/CampaignVolunteerPromp
 import NavMenu from 'components/NavMenu';
 import TabbedNavigation from 'components/TabbedNavigation';
 import ActivityFeed from 'components/activity/ActivityFeed';
-import { DASHBOARD_CAMPAIGN_ROUTE } from 'routes';
+import useAuthorizationGate from 'hooks/useAuthorizationGate';
+import useApiFetch from 'hooks/useApiFetch';
+import { useApplicationContext, pushSnackError } from 'ApplicationContext';
+import { DASHBOARD_CAMPAIGN_ROUTE, LOGIN_ROUTE } from 'routes';
 import logo from 'assets/logo-name-blue-100.png';
 
 const PageContainer = styled.div`
@@ -152,6 +153,11 @@ export default function DashboardPage(props) {
           return;
         }
 
+        if (response.status === 404) {
+          setActiveCampaign(404);
+          return;
+        }
+
         throw new Error(json.error || 'Failed to load campaign');
       } catch (error) {
         console.error(error);
@@ -169,6 +175,8 @@ export default function DashboardPage(props) {
       fetchCampaignAndMakeActive('id', id);
     } else if ((slug && !activeCampaign) || (slug && activeCampaign && slug !== activeCampaign.slug)) {
       fetchCampaignAndMakeActive('slug', slug);
+    } else if (!slug && !account) {
+      navigate(LOGIN_ROUTE);
     }
 
     return () => cancel = true;
@@ -184,7 +192,7 @@ export default function DashboardPage(props) {
   ]);
 
   React.useEffect(() => {
-    if (activeCampaign) {
+    if (activeCampaign && activeCampaign !== 404) {
       const compareUrl = DASHBOARD_CAMPAIGN_ROUTE.replace(':slug', activeCampaign.slug);
 
       if (!location.pathname.startsWith(compareUrl)) {
@@ -197,6 +205,10 @@ export default function DashboardPage(props) {
     location,
     navigate,
   ]);
+
+  if (activeCampaign === 404) {
+    return <NotFoundPage />
+  }
 
   function onPromptConfirmation(account, campaign) {
     setActiveCampaign(campaign);
