@@ -15,7 +15,7 @@ import ActivityFeed from 'components/activity/ActivityFeed';
 import useAuthorizationGate from 'hooks/useAuthorizationGate';
 import useApiFetch from 'hooks/useApiFetch';
 import { useApplicationContext, pushSnackError } from 'ApplicationContext';
-import { DASHBOARD_CAMPAIGN_ROUTE, LOGIN_ROUTE } from 'routes';
+import { DASHBOARD_CAMPAIGN_ROUTE, DASHBOARD_DEFAULT_ROUTE, LOGIN_ROUTE } from 'routes';
 import logo from 'assets/logo-name-blue-100.png';
 
 const PageContainer = styled.div`
@@ -155,7 +155,16 @@ export default function DashboardPage(props) {
         }
 
         if (response.status === 404) {
-          setActiveCampaign(404);
+          if (qualifier === 'slug' && localStorage.getItem('lastActiveCampaignSlug') === value) {
+            localStorage.removeItem('lastActiveCampaignSlug');
+          }
+
+          if (!!slug) {
+            setActiveCampaign(404);
+          } else {
+            navigate(DASHBOARD_DEFAULT_ROUTE);
+          }
+
           return;
         }
 

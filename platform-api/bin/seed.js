@@ -60,7 +60,7 @@ const seedWiki = require('./seed-wiki');
         '/seed/campaign-mr-puff-pastry.jpg',
       ),
       Campaign(db).createCampaign(
-        'Penny For NY-10 ',
+        'Penny For NY-10',
         'New York, NY',
         '/seed/campaign-penny.jpg',
       ),
