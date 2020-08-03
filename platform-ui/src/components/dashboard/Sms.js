@@ -14,7 +14,7 @@ const Container = styled.div`
 `;
 
 export default function Sms(props) {
-  const { campaign } = props;
+  const { campaign, isPartying, setIsPartying } = props;
 
   const { authentication: { account } } = useApplicationContext();
 
@@ -22,8 +22,12 @@ export default function Sms(props) {
     <Container>
       <ActivityReporter
         campaign={campaign}
+        activityType="texts"
         prompt="How did your conversation go?"
         verb="sms conversations"
+        modulus="25"
+        isPartying={isPartying}
+        setIsPartying={setIsPartying}
       />
       <Frame src={!!campaign && !!account && campaign.dialer.sms} />
     </Container>

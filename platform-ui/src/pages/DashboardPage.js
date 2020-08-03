@@ -275,7 +275,12 @@ export default function DashboardPage(props) {
               isPartying={isPartying}
               setIsPartying={setIsPartying}
             />
-            <Sms path={SMS} campaign={activeCampaign} />
+            <Sms
+              path={SMS}
+              campaign={activeCampaign}
+              isPartying={isPartying}
+              setIsPartying={setIsPartying}
+            />
             <Wiki path={RESOURCES} campaign={activeCampaign} />
           </Router>
         </Row>

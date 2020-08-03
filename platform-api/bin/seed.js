@@ -184,6 +184,57 @@ const seedWiki = require('./seed-wiki');
       },
     );
 
+    console.log('Seeding volunteer activity...');
+
+    await Activity(db).createActivity(
+      ben,
+      campaigns[0],
+      'calls',
+      10,
+    );
+
+    await Activity(db).createActivity(
+      ben,
+      campaigns[0],
+      'calls',
+      20,
+    );
+
+    await Activity(db).createActivity(
+      ben,
+      campaigns[0],
+      'calls',
+      30,
+    );
+
+    await Activity(db).createActivity(
+      suzy,
+      campaigns[0],
+      'texts',
+      50,
+    );
+
+    await Activity(db).createActivity(
+      ben,
+      campaigns[0],
+      'calls',
+      40,
+    );
+
+    await Activity(db).createActivity(
+      ben,
+      campaigns[0],
+      'calls',
+      50,
+    );
+
+    await Activity(db).createActivity(
+      suzy,
+      campaigns[0],
+      'texts',
+      100,
+    );
+
     console.log('Seed finished!');
     process.exit(0);
   } catch (error) {
