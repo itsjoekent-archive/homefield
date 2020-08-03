@@ -1,11 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from '@reach/router';
+import { BlueButton, MutedButtonInverted } from 'components/Buttons';
 import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 import {
   EDIT_ACCOUNT_SETTINGS_ROUTE,
   EDIT_ACCOUNT_CAMPAIGNS_ROUTE,
   LOGIN_ROUTE,
+  SIGNUP_ROUTE,
   PROFILE_ROUTE,
 } from 'routes';
 import useClickOutside from 'hooks/useClickOutside';
@@ -111,26 +113,45 @@ const DropdownList = styled.div`
 `;
 
 const DropdownLink = styled.span`
-  width: 100%;
-  padding: 4px 6px;
-
-  background-color: ${({ theme }) => theme.colors.mono.white};
-  cursor: pointer;
-
   a {
     font-family: ${({ theme }) => theme.font};
     font-size: ${({ theme }) => theme.type.size.paragraph};
     font-weight: ${({ theme }) => theme.type.weight.paragraph};
-    text-align: left;
+    text-align: center;
     color: ${({ danger, theme }) => danger ? theme.colors.red.base : theme.colors.blue.darkest};
     text-decoration: none;
+
+    display: block;
+
+    width: 100%;
+    padding: 4px 6px;
+
+    background-color: ${({ theme }) => theme.colors.mono.white};
+    cursor: pointer;
   }
 
   &:hover {
-    background-color: ${({ theme }) => theme.colors.blue.base};
-
     a {
       color: ${({ theme }) => theme.colors.mono.white};
+      background-color: ${({ theme }) => theme.colors.blue.base};
+    }
+  }
+`;
+
+const ButtonRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+
+  ${MutedButtonInverted} {
+    margin-right: 12px;
+  }
+
+  ${MutedButtonInverted}, ${BlueButton} {
+    a {
+      color: inherit;
+      text-decoration: none;
     }
   }
 `;
@@ -179,8 +200,16 @@ export default function NavMenu() {
   }
 
   if (!account) {
-    // TODO...
-    return null;
+    return (
+      <ButtonRow>
+        <MutedButtonInverted>
+          <Link to={LOGIN_ROUTE}>Log In</Link>
+        </MutedButtonInverted>
+        <BlueButton>
+          <Link to={SIGNUP_ROUTE}>Sign Up</Link>
+        </BlueButton>
+      </ButtonRow>
+    );
   }
 
   return (

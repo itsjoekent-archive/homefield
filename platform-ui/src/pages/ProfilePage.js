@@ -78,7 +78,18 @@ const Avatar = styled.img`
 const BioName = styled.h1`
   font-family: ${({ theme }) => theme.font};
   font-size: ${({ theme }) => theme.type.size.title};
-  font-weight: ${({ theme }) => theme.type.weight.title};;
+  font-weight: ${({ theme }) => theme.type.weight.title};
+  color: ${({ theme }) => theme.colors.mono.black};
+
+  text-align: center;
+
+  margin-bottom: 4px;
+`;
+
+const BioCreatedAt = styled.p`
+  font-family: ${({ theme }) => theme.font};
+  font-size: ${({ theme }) => theme.type.size.label};
+  font-weight: 200;
   color: ${({ theme }) => theme.colors.mono.black};
 
   text-align: center;
@@ -202,6 +213,21 @@ const BioUploadAvatarContainer = styled.div`
     }
   `}
 `;
+
+const months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 
 export default function ProfilePage(props) {
   const { username } = props;
@@ -434,6 +460,7 @@ export default function ProfilePage(props) {
               <BioName>
                 {account.firstName} {account.lastName}
               </BioName>
+              <BioCreatedAt>Joined {months[new Date(account.createdAt).getMonth()]} {new Date(account.createdAt).getFullYear()}</BioCreatedAt>
               {isEditing && (
                 <FormController formId="edit-profile" asyncOnSubmit={onEditProfile}>
                   <TextInput

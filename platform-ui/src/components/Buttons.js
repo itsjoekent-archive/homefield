@@ -74,6 +74,20 @@ export const LightBlueButton = styled(Button)`
   ${({ loading }) => loading === 'true' && disabledStyles}
 `;
 
+export const BlueButton = styled(Button)`
+  color: ${({ theme }) => theme.colors.mono.white};
+  background-color: ${({ theme }) => theme.colors.blue.base};
+
+  ${({ loading }) => (!loading || !JSON.parse(loading)) && css`
+    &:hover {
+      background-color: ${({ theme }) => theme.colors.blue.darkest};
+    }
+  `}
+
+  ${({ loading }) => loading === 'true' && disabledStyles}
+`;
+
+
 export const MutedButton = styled(Button)`
   color: ${({ theme }) => theme.colors.mono.black};
   background-color: ${({ theme }) => theme.colors.mono[300]};
@@ -82,6 +96,20 @@ export const MutedButton = styled(Button)`
     &:hover {
       color: ${({ theme }) => theme.colors.mono.white};
       background-color: ${({ theme }) => theme.colors.mono[900]};
+    }
+  `}
+
+  ${({ loading }) => loading === 'true' && disabledStyles}
+`;
+
+export const MutedButtonInverted = styled(Button)`
+  color: ${({ theme }) => theme.colors.mono.white};
+  background-color: ${({ theme }) => theme.colors.mono[900]};
+
+  ${({ loading }) => (!loading || !JSON.parse(loading)) && css`
+    &:hover {
+      color: ${({ theme }) => theme.colors.mono.black};
+      background-color: ${({ theme }) => theme.colors.mono[300]};
     }
   `}
 
