@@ -67,7 +67,7 @@ module.exports = () => {
         .join(', ');
 
       res.status(451).json({
-        error: `You are cannot volunteer for this campaign while volunteering for ${conflictedCampaignNames}`,
+        error: `You are cannot volunteer for "${campaign.name}, ${campaign.location}" while volunteering for ${conflictedCampaignNames}`,
       });
 
       return;
