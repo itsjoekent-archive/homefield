@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link, useNavigate } from '@reach/router';
+import { Link, useLocation, useNavigate } from '@reach/router';
 import Prompt from 'components/Prompt';
 import Firewall from 'components/Firewall';
 import { LightBlueButton, BoldTextButton } from 'components/Buttons';
@@ -87,6 +87,7 @@ export default function CampaignVolunteerPrompt(props) {
   const { campaign, onConfirmation } = props;
 
   const apiFetch = useApiFetch();
+  const location = useLocation();
   const navigate = useNavigate();
 
   const { authentication: { account }, dispatch } = useApplicationContext();
@@ -222,7 +223,9 @@ export default function CampaignVolunteerPrompt(props) {
             <FormErrorMessage />
           </FormController>
           <LoginButton>
-            <Link to={LOGIN_ROUTE}>Log in to existing account</Link>
+            <Link to={`${LOGIN_ROUTE}?returnTo=${location.pathname}`}>
+              Log in to existing account
+            </Link>
           </LoginButton>
         </SignupContainer>
       </Prompt>

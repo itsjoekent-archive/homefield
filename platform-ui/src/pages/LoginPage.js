@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link, useNavigate } from '@reach/router';
+import { Link, useLocation, useNavigate } from '@reach/router';
 import Facade from 'components/Facade';
 import FacadeBlock, { Block } from 'components/FacadeBlock';
 import FormController from 'components/forms/FormController';
@@ -33,6 +33,7 @@ export default function LoginPage() {
 
   const apiFetch = useApiFetch(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   React.useEffect(() => {
     if (authentication.token) {
@@ -75,7 +76,14 @@ export default function LoginPage() {
       localStorage.setItem('token', token.bearer);
       localStorage.setItem('token-expiration', token.expiresAt);
 
-      navigate(DASHBOARD_DEFAULT_ROUTE);
+      const search = new URLSearchParams(location.search);
+      const returnTo = search.get('returnTo');
+
+      if (returnTo) {
+        navigate(returnTo);
+      } else {
+        navigate(DASHBOARD_DEFAULT_ROUTE);        
+      }
 
       return;
     }

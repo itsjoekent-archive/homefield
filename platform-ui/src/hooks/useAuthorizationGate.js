@@ -1,11 +1,12 @@
 import React from 'react';
-import { useNavigate } from '@reach/router';
+import { useLocation, useNavigate } from '@reach/router';
 import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 import { LOGIN_ROUTE } from 'routes';
 import useApiFetch from 'hooks/useApiFetch';
 
 export default function useAuthorizationGate(redirectOnFail = true) {
   const apiFetch = useApiFetch(false);
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [hasAttempted, setHasAttempted] = React.useState(false);
@@ -57,7 +58,7 @@ export default function useAuthorizationGate(redirectOnFail = true) {
           localStorage.removeItem('token');
 
           if (redirectOnFail) {
-            navigate(LOGIN_ROUTE);
+            navigate(`${LOGIN_ROUTE}?returnTo=${location.pathname}`);
           }
         });
     }
@@ -71,7 +72,7 @@ export default function useAuthorizationGate(redirectOnFail = true) {
       setHasAttempted(true);
 
       if (redirectOnFail) {
-        navigate(LOGIN_ROUTE);
+        navigate(`${LOGIN_ROUTE}?returnTo=${location.pathname}`);
       }
     }
     // eslint-disable-next-line

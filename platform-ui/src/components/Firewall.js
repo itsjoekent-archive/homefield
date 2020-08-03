@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Link } from '@reach/router';
 import { CancelButtonInverted, Button } from 'components/Buttons';
 import useClickOutside from 'hooks/useClickOutside';
