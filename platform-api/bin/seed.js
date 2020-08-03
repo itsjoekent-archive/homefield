@@ -91,7 +91,7 @@ const seedWiki = require('./seed-wiki');
       {
         '$set': {
           dialer: {
-            iframe: 'https://www.thrutalk.io/caller/login/vfh2020nc',
+            iframe: 'http://thrutalk.io/caller/login/iframe/vfh2020nc',
           },
           firewall: [
             campaigns[2]._id,

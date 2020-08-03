@@ -134,3 +134,13 @@ export const CancelButton = styled.button`
     border: 2px solid ${({ theme }) => theme.colors.red.base};
   }
 `;
+
+export const CancelButtonInverted = styled(CancelButton)`
+  color: ${({ theme }) => theme.colors.mono.white};
+  border: 2px solid ${({ theme }) => theme.colors.mono.white};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.red.base};
+    background-color: ${({ theme }) => theme.colors.mono.white};
+  }
+`;

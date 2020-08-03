@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from '@reach/router';
 import Prompt from 'components/Prompt';
+import Firewall from 'components/Firewall';
 import { LightBlueButton, BoldTextButton } from 'components/Buttons';
 import FormController from 'components/forms/FormController';
 import EmailInput from 'components/forms/EmailInput';
@@ -91,6 +92,7 @@ export default function CampaignVolunteerPrompt(props) {
   const { authentication: { account }, dispatch } = useApplicationContext();
 
   const [hasConfirmed, setHasConfirmed] = React.useState();
+  const [firewallError, setFirewallError] = React.useState(null);
 
   React.useEffect(() => {
     let cancel = false;
@@ -109,6 +111,11 @@ export default function CampaignVolunteerPrompt(props) {
         }
 
         setHasConfirmed(false);
+
+        if (response.status === 451) {
+          setFirewallError(json.error);
+          return;
+        }
 
         if (response.status === 200) {
           onConfirmation(json.data.account, json.data.campaign);
@@ -225,6 +232,15 @@ export default function CampaignVolunteerPrompt(props) {
   function onClose() {
     localStorage.removeItem('lastActiveCampaignSlug');
     navigate(DASHBOARD_DEFAULT_ROUTE);
+  }
+
+  if (firewallError) {
+    return (
+      <Firewall
+        errorMessage={firewallError}
+        onClose={() => setFirewallError(null)}
+      />
+    );
   }
 
   return (

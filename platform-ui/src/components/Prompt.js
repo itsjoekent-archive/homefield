@@ -5,7 +5,7 @@ import { CancelButton, LightBlueButton } from 'components/Buttons';
 import useClickOutside from 'hooks/useClickOutside';
 
 const Backdrop = styled.div`
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;

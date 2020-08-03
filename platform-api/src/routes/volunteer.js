@@ -61,12 +61,12 @@ module.exports = () => {
             return null;
           }
 
-          return conflictedCampaign.name;
+          return `"${conflictedCampaign.name}, ${conflictedCampaign.location}"`;
         })
         .filter((name) => !!name)
-        .join(',');
+        .join(', ');
 
-      res.status(400).json({
+      res.status(451).json({
         error: `You are cannot volunteer for this campaign while volunteering for ${conflictedCampaignNames}`,
       });
 

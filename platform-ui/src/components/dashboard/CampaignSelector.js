@@ -1,6 +1,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import { useNavigate } from '@reach/router';
+import Firewall from 'components/Firewall';
 import {
   CampaignLogo,
   CampaignDetails,
@@ -155,6 +156,7 @@ export default function CampaignSelector(props) {
   const [accountCampaigns, setAccountCampaigns] = React.useState(null);
   const [allCampaigns, setAllCampaigns] = React.useState(null);
   const [targetCampaign, setTargetCampaign] = React.useState(null);
+  const [firewallError, setFirewallError] = React.useState(null);
 
   const containerRef = useClickOutside(() => setIsOpen(false));
 
@@ -255,6 +257,12 @@ export default function CampaignSelector(props) {
 
         setTargetCampaign(null);
 
+        if (response.status === 451) {
+          setFirewallError(json.error);
+          setIsOpen(false);
+          return;
+        }
+
         if (response.status === 200) {
           const { data: { campaign: { slug } } } = json;
 
@@ -331,39 +339,47 @@ export default function CampaignSelector(props) {
   }
 
   return (
-    <Container ref={containerRef}>
-      <SelectedCampaignRow disabled={!account} onClick={() => setIsOpen(!isOpen)}>
-        <CampaignLogo src={(activeCampaign || {}).logoUrl} />
-        <CampaignDetails>
-          <CampaignTitle>{(activeCampaign || {}).name}</CampaignTitle>
-          <CampaignLocation>{(activeCampaign || {}).location}</CampaignLocation>
-        </CampaignDetails>
-      </SelectedCampaignRow>
-      {isOpen && (
-        <Dropdown isLoading={!!targetCampaign} onBlur={() => setIsOpen(false)}>
-          <DropdownTitleRow>Your Campaigns</DropdownTitleRow>
-          {accountCampaigns && accountCampaigns.map((campaign) => (
-            <DropdownCampaignRow key={campaign.id} onClick={() => onSwitchCampaign(campaign)}>
-              <CampaignLogo src={campaign.logoUrl} />
-              <CampaignDetails>
-                <CampaignTitle>{campaign.name}</CampaignTitle>
-                <CampaignLocation>{campaign.location}</CampaignLocation>
-              </CampaignDetails>
-            </DropdownCampaignRow>
-          ))}
-          <DropdownTitleRow>All Campaigns</DropdownTitleRow>
-          {/* TODO: Pagination when you reach the bottom */}
-          {allCampaigns && allCampaigns.map((campaign) => (
-            <DropdownCampaignRow key={campaign.id} onClick={() => onVolunteerForCampaign(campaign)}>
-              <CampaignLogo src={campaign.logoUrl} />
-              <CampaignDetails>
-                <CampaignTitle>{campaign.name}</CampaignTitle>
-                <CampaignLocation>{campaign.location}</CampaignLocation>
-              </CampaignDetails>
-            </DropdownCampaignRow>
-          ))}
-        </Dropdown>
+    <React.Fragment>
+      {firewallError && (
+        <Firewall
+          errorMessage={firewallError}
+          onClose={() => setFirewallError(null)}
+        />
       )}
-    </Container>
+      <Container ref={containerRef}>
+        <SelectedCampaignRow disabled={!account} onClick={() => setIsOpen(!isOpen)}>
+          <CampaignLogo src={(activeCampaign || {}).logoUrl} />
+          <CampaignDetails>
+            <CampaignTitle>{(activeCampaign || {}).name}</CampaignTitle>
+            <CampaignLocation>{(activeCampaign || {}).location}</CampaignLocation>
+          </CampaignDetails>
+        </SelectedCampaignRow>
+        {isOpen && (
+          <Dropdown isLoading={!!targetCampaign} onBlur={() => setIsOpen(false)}>
+            <DropdownTitleRow>Your Campaigns</DropdownTitleRow>
+            {accountCampaigns && accountCampaigns.map((campaign) => (
+              <DropdownCampaignRow key={campaign.id} onClick={() => onSwitchCampaign(campaign)}>
+                <CampaignLogo src={campaign.logoUrl} />
+                <CampaignDetails>
+                  <CampaignTitle>{campaign.name}</CampaignTitle>
+                  <CampaignLocation>{campaign.location}</CampaignLocation>
+                </CampaignDetails>
+              </DropdownCampaignRow>
+            ))}
+            <DropdownTitleRow>All Campaigns</DropdownTitleRow>
+            {/* TODO: Pagination when you reach the bottom */}
+            {allCampaigns && allCampaigns.map((campaign) => (
+              <DropdownCampaignRow key={campaign.id} onClick={() => onVolunteerForCampaign(campaign)}>
+                <CampaignLogo src={campaign.logoUrl} />
+                <CampaignDetails>
+                  <CampaignTitle>{campaign.name}</CampaignTitle>
+                  <CampaignLocation>{campaign.location}</CampaignLocation>
+                </CampaignDetails>
+              </DropdownCampaignRow>
+            ))}
+          </Dropdown>
+        )}
+      </Container>
+    </React.Fragment>
   );
 }
