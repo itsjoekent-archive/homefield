@@ -67,6 +67,7 @@ const theme = {
   },
   zIndex: {
     dropdown: 90,
+    hub: 91,
     onboarding: 100,
     modal: 110,
     snacks: 1000,

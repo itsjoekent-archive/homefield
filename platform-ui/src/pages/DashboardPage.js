@@ -9,6 +9,7 @@ import Phonebank from 'components/dashboard/Phonebank';
 import Sms from 'components/dashboard/Sms';
 import Wiki from 'components/dashboard/Wiki';
 import CampaignVolunteerPrompt from 'components/dashboard/CampaignVolunteerPrompt';
+import GizmoController from 'components/gizmo/GizmoController';
 import NavMenu from 'components/NavMenu';
 import TabbedNavigation from 'components/TabbedNavigation';
 import ActivityFeed from 'components/activity/ActivityFeed';
@@ -238,61 +239,64 @@ export default function DashboardPage(props) {
     && !account.campaigns.includes(activeCampaign.id);
 
   return (
-    <PageContainer>
-      {!!account && !accountHasCampaigns && (
-        <OnboardingFlow />
-      )}
-      {isNotVolunteeringForActiveCampaign && (
-        <CampaignVolunteerPrompt
-          campaign={activeCampaign}
-          onConfirmation={onPromptConfirmation}
-        />
-      )}
-      {!account && hasAttemptedAuthorization && (
-        <CampaignVolunteerPrompt
-          campaign={activeCampaign}
-          onConfirmation={onPromptConfirmation}
-        />
-      )}
-      <NavContainer>
-        <Row>
-          <NavPlatformRow>
-            <CampaignSelector activeCampaign={activeCampaign} />
-            <NavMenu />
-          </NavPlatformRow>
-        </Row>
-        <Row>
-          <TabbedNavigation tabs={tabs} />
-        </Row>
-      </NavContainer>
-      <MainContainer>
-        <Row>
-          <Router>
-            <ActivityFeed path="/" campaignId={activeCampaign && activeCampaign.id} />
-            <Phonebank
-              path={PHONEBANK}
-              campaign={activeCampaign}
-              isPartying={isPartying}
-              setIsPartying={setIsPartying}
-            />
-            <Sms
-              path={SMS}
-              campaign={activeCampaign}
-              isPartying={isPartying}
-              setIsPartying={setIsPartying}
-            />
-            <Wiki path={RESOURCES} campaign={activeCampaign} />
-          </Router>
-        </Row>
-        <ConfettiContainer>
-          <Confetti
-            recycle={false}
-            run={isPartying}
-            onConfettiComplete={() => setIsPartying(false)}
+    <React.Fragment>
+      <GizmoController />
+      <PageContainer>
+        {!!account && !accountHasCampaigns && (
+          <OnboardingFlow />
+        )}
+        {isNotVolunteeringForActiveCampaign && (
+          <CampaignVolunteerPrompt
+            campaign={activeCampaign}
+            onConfirmation={onPromptConfirmation}
           />
-        </ConfettiContainer>
-      </MainContainer>
-      <Logo src={logo} />
-    </PageContainer>
+        )}
+        {!account && hasAttemptedAuthorization && (
+          <CampaignVolunteerPrompt
+            campaign={activeCampaign}
+            onConfirmation={onPromptConfirmation}
+          />
+        )}
+        <NavContainer>
+          <Row>
+            <NavPlatformRow>
+              <CampaignSelector activeCampaign={activeCampaign} />
+              <NavMenu />
+            </NavPlatformRow>
+          </Row>
+          <Row>
+            <TabbedNavigation tabs={tabs} />
+          </Row>
+        </NavContainer>
+        <MainContainer>
+          <Row>
+            <Router>
+              <ActivityFeed path="/" campaignId={activeCampaign && activeCampaign.id} />
+              <Phonebank
+                path={PHONEBANK}
+                campaign={activeCampaign}
+                isPartying={isPartying}
+                setIsPartying={setIsPartying}
+              />
+              <Sms
+                path={SMS}
+                campaign={activeCampaign}
+                isPartying={isPartying}
+                setIsPartying={setIsPartying}
+              />
+              <Wiki path={RESOURCES} campaign={activeCampaign} />
+            </Router>
+          </Row>
+          <ConfettiContainer>
+            <Confetti
+              recycle={false}
+              run={isPartying}
+              onConfettiComplete={() => setIsPartying(false)}
+            />
+          </ConfettiContainer>
+        </MainContainer>
+        <Logo src={logo} />
+      </PageContainer>
+    </React.Fragment>
   );
 }
