@@ -1,9 +1,13 @@
 import React from 'react';
 import styled, { css, keyframes } from 'styled-components';
-import GizmoPushButton from 'components/gizmo/GizmoPushButton';
 import ToggleMicrophoneButton from 'components/gizmo/ToggleMicrophoneButton';
 import ToggleBroadcastButton from 'components/gizmo/ToggleBroadcastButton';
-import { setStick, useGizmoController } from 'components/gizmo/GizmoController';
+import ToggleBroadcastConnectionButton from 'components/gizmo/ToggleBroadcastConnectionButton';
+import ToggleBreakoutRoomsButton from 'components/gizmo/ToggleBreakoutRoomsButton';
+import ToggleStickModeButton from 'components/gizmo/ToggleStickModeButton';
+import VideoConnectionPrompt from 'components/gizmo/VideoConnectionPrompt';
+import VideoStreamList from 'components/gizmo/VideoStreamList';
+import { useGizmoController } from 'components/gizmo/GizmoController';
 
 const fadeIn = keyframes`
   0% {
@@ -58,9 +62,9 @@ const Container = styled.div`
 
 const ChatContainer = styled.div`
   width: 100%;
-  height: 60%;
+  flex-grow: 1;
 
-  transition: height 1s;
+  transition: flex-grow 1s;
 
   background-color: ${({ theme }) => theme.colors.mono.white};
 
@@ -68,26 +72,51 @@ const ChatContainer = styled.div`
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
 
   ${({ isStick }) => isStick && css`
-    height: 0px;
+    flex-grow: 0;
   `}
 `;
 
 const TopControlRow = styled.div`
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   padding: 8px;
 `;
 
-const ControlButtonWrapper = styled.span`
-  margin-right: 12px;
+const TopControlRowSection = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
 
-  &:last-child {
-    margin-right: 0;
-  }
+const ControlButtonWrapper = styled.span`
+  ${({ direction, end }) => css`
+    margin-${direction}: 8px;
+
+    &:${end}-child {
+      margin-${direction}: 0;
+    }
+  `}
+`;
+
+const StickControls = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  align-items: center;
+
+  margin-top: 8px;
+  margin-bottom: 8px;
 `;
 
 export default function Popout() {
-  const { dispatch, isOpen, isStick } = useGizmoController();
+  const {
+    isOpen,
+    isStick,
+    isVideoConnected,
+  } = useGizmoController();
 
   const [hide, setHide] = React.useState(!isOpen);
 
@@ -116,15 +145,48 @@ export default function Popout() {
 
   return (
     <Container isOpen={isOpen} isStick={isStick}>
-      <TopControlRow>
-        <ControlButtonWrapper>
-          <ToggleMicrophoneButton />
-        </ControlButtonWrapper>
-        <ControlButtonWrapper>
-          <ToggleBroadcastButton />
-        </ControlButtonWrapper>
-      </TopControlRow>
-      <button onClick={() => dispatch(setStick(!isStick))}>{`isStick: ${isStick}`}</button>
+      {isStick && (
+        <StickControls>
+          <ControlButtonWrapper direction="bottom" end="last">
+            <ToggleMicrophoneButton />
+          </ControlButtonWrapper>
+          <ControlButtonWrapper direction="bottom" end="last">
+            <ToggleBroadcastButton />
+          </ControlButtonWrapper>
+          <ControlButtonWrapper direction="bottom" end="last">
+            <ToggleStickModeButton />
+          </ControlButtonWrapper>
+        </StickControls>
+      )}
+      {!isStick && isVideoConnected && (
+        <TopControlRow>
+          <TopControlRowSection>
+            <ControlButtonWrapper direction="right" end="last">
+              <ToggleMicrophoneButton />
+            </ControlButtonWrapper>
+            <ControlButtonWrapper direction="right" end="last">
+              <ToggleBroadcastButton />
+            </ControlButtonWrapper>
+          </TopControlRowSection>
+          <TopControlRowSection>
+            <ControlButtonWrapper direction="left" end="first">
+              <ToggleBroadcastConnectionButton />
+            </ControlButtonWrapper>
+            <ControlButtonWrapper direction="left" end="first">
+              <ToggleBreakoutRoomsButton />
+            </ControlButtonWrapper>
+            <ControlButtonWrapper direction="left" end="first">
+              <ToggleStickModeButton />
+            </ControlButtonWrapper>
+          </TopControlRowSection>
+        </TopControlRow>
+      )}
+      {!isStick && !isVideoConnected && (
+        <VideoConnectionPrompt />
+      )}
+      {isVideoConnected && (
+        <VideoStreamList />
+      )}
       <ChatContainer isStick={isStick}>
 
       </ChatContainer>

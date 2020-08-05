@@ -8,6 +8,9 @@ const defaultGizmoControllerContext = {
   isStick: false,
   isMuted: true,
   isBroadcasting: false,
+  isVideoConnected: false,
+  isViewingBreakoutRooms: false,
+  mediaStream: null,
 };
 
 export const GizmoControllerContext = React.createContext(defaultGizmoControllerContext);
@@ -47,21 +50,65 @@ export function setBroadcast(isBroadcasting) {
   return { type: SET_BROADCAST, isBroadcasting };
 }
 
+const CONNECT_VIDEO = 'CONNECT_VIDEO';
+export function connectToVideo(mediaStream) {
+  return { type: CONNECT_VIDEO, mediaStream };
+}
+
+const DISCONNECT_VIDEO = 'DISCONNECT_VIDEO';
+export function disconnectFromVideo() {
+  return { type: DISCONNECT_VIDEO };
+}
+
+const SET_VIEWING_BREAKOUT_ROOMS = 'SET_VIEWING_BREAKOUT_ROOMS';
+export function setViewingBreakoutRooms(isViewingBreakoutRooms) {
+  return { type: SET_VIEWING_BREAKOUT_ROOMS, isViewingBreakoutRooms };
+}
+
 function gizmoReducer(state, action) {
   switch (action.type) {
     case SET_OPEN:
-      // TODO: Mute audio / end video if closed
       const { isOpen } = action;
-      return { ...state, isOpen };
+
+      return {
+        ...state,
+        isOpen,
+        isBroadcasting: isOpen ? state.isBroadcasting : false,
+        isMuted: isOpen ? state.isMuted : false,
+        isViewingBreakoutRooms: isOpen ? state.isViewingBreakoutRooms : false,
+      };
     case SET_STICK:
       const { isStick } = action;
       return { ...state, isStick };
+
     case SET_MUTE:
       const { isMuted } = action;
       return { ...state, isMuted };
+
     case SET_BROADCAST:
       const { isBroadcasting } = action;
       return { ...state, isBroadcasting };
+
+    case CONNECT_VIDEO:
+      const { mediaStream } = action;
+
+      return {
+        ...state,
+        isVideoConnected: true,
+        mediaStream,
+      };
+
+    case DISCONNECT_VIDEO:
+      return {
+        ...state,
+        isVideoConnected: false,
+        mediaStream: null,
+      };
+
+    case SET_VIEWING_BREAKOUT_ROOMS:
+      const { isViewingBreakoutRooms } = action;
+      return { ...state, isViewingBreakoutRooms };
+
     default:
       return state;
   }
