@@ -9,7 +9,6 @@ import Phonebank from 'components/dashboard/Phonebank';
 import Sms from 'components/dashboard/Sms';
 import Wiki from 'components/dashboard/Wiki';
 import CampaignVolunteerPrompt from 'components/dashboard/CampaignVolunteerPrompt';
-import GizmoController from 'components/gizmo/GizmoController';
 import NavMenu from 'components/NavMenu';
 import TabbedNavigation from 'components/TabbedNavigation';
 import ActivityFeed from 'components/activity/ActivityFeed';
@@ -18,6 +17,8 @@ import useApiFetch from 'hooks/useApiFetch';
 import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 import { DASHBOARD_CAMPAIGN_ROUTE, DASHBOARD_DEFAULT_ROUTE, LOGIN_ROUTE } from 'routes';
 import logo from 'assets/logo-name-blue-100.png';
+
+const GizmoController = React.lazy(() => import('components/gizmo/GizmoController'));
 
 const PageContainer = styled.div`
   display: flex;
@@ -218,7 +219,9 @@ export default function DashboardPage(props) {
   ]);
 
   if (activeCampaign === 404) {
-    return <NotFoundPage />
+    return (
+      <NotFoundPage />
+    );
   }
 
   function onPromptConfirmation(account, campaign) {
@@ -240,7 +243,7 @@ export default function DashboardPage(props) {
 
   return (
     <React.Fragment>
-      <GizmoController />
+      {!!account && <GizmoController activeCampaign={activeCampaign} />}
       <PageContainer>
         {!!account && !accountHasCampaigns && (
           <OnboardingFlow />
@@ -271,7 +274,10 @@ export default function DashboardPage(props) {
         <MainContainer>
           <Row>
             <Router>
-              <ActivityFeed path="/" campaignId={activeCampaign && activeCampaign.id} />
+              <ActivityFeed
+                path="/"
+                campaignId={activeCampaign && activeCampaign.id}
+              />
               <Phonebank
                 path={PHONEBANK}
                 campaign={activeCampaign}

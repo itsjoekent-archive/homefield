@@ -57,6 +57,7 @@ const Container = styled.div`
 
   ${({ isStick }) => isStick && css`
     max-width: 88px;
+    align-items: center;
   `}
 `;
 

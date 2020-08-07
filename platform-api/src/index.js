@@ -96,7 +96,7 @@ const wrapAsyncFunction = require('./utils/wrapAsyncFunction');
 
     app.use('/v1', router);
 
-    app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+    app.listen(PORT, () => console.log(`platform-api listening on port ${PORT}`));
   } catch (error) {
     console.error(error);
     process.exit(1);

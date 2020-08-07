@@ -33,6 +33,7 @@ const placementStyles = {
 const Wrapper = styled.div`
   display: flex;
   position: relative;
+  width: fit-content;
 
   ${({ placement }) => placementStyles[placement]['wrapper']}
 

@@ -16,7 +16,7 @@ export function pushSnackError(dispatch, error) {
       {
         id: Date.now(),
         type: 'error',
-        message: error.message,
+        message: error instanceof Error ? error.message : error,
       }
     ],
   }))

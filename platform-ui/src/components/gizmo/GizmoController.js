@@ -1,7 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
+import io from 'socket.io-client';
 import FloatingButton from 'components/gizmo/FloatingButton';
 import Popout from 'components/gizmo/Popout';
+import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 
 const defaultGizmoControllerContext = {
   isOpen: false,
@@ -11,6 +13,7 @@ const defaultGizmoControllerContext = {
   isVideoConnected: false,
   isViewingBreakoutRooms: false,
   mediaStream: null,
+  socket: null,
 };
 
 export const GizmoControllerContext = React.createContext(defaultGizmoControllerContext);
@@ -65,6 +68,11 @@ export function setViewingBreakoutRooms(isViewingBreakoutRooms) {
   return { type: SET_VIEWING_BREAKOUT_ROOMS, isViewingBreakoutRooms };
 }
 
+const SET_SOCKET = 'SET_SOCKET';
+function setSocket(socket) {
+  return { type: SET_SOCKET, socket };
+}
+
 function gizmoReducer(state, action) {
   switch (action.type) {
     case SET_OPEN:
@@ -77,6 +85,7 @@ function gizmoReducer(state, action) {
         isMuted: isOpen ? state.isMuted : false,
         isViewingBreakoutRooms: isOpen ? state.isViewingBreakoutRooms : false,
       };
+
     case SET_STICK:
       const { isStick } = action;
       return { ...state, isStick };
@@ -88,6 +97,10 @@ function gizmoReducer(state, action) {
     case SET_BROADCAST:
       const { isBroadcasting } = action;
       return { ...state, isBroadcasting };
+
+    case SET_SOCKET:
+      const { socket } = action;
+      return { ...state, socket };
 
     case CONNECT_VIDEO:
       const { mediaStream } = action;
@@ -115,9 +128,50 @@ function gizmoReducer(state, action) {
 }
 
 export default function GizmoController(props) {
+  const { activeCampaign } = props;
+
   const [state, dispatch] = React.useReducer(gizmoReducer, defaultGizmoControllerContext);
 
-  const contextValue = { ...state, dispatch };
+  const contextValue = {
+    ...state,
+    dispatch,
+  };
+
+  const {
+    authentication: { token },
+    dispatch: dispatchApplication,
+  } = useApplicationContext();
+
+  React.useEffect(() => {
+    let connection = state.socket;
+
+    if (!state.socket && token) {
+      connection = io(`${process.env.REACT_APP_SOCKET_URL}?bearer=${token}`);
+      dispatch(setSocket(connection));
+    }
+
+    if (connection) {
+      connection.on('error', (error) => {
+        console.log(error);
+        pushSnackError(dispatchApplication, error);
+      });
+
+      return () => connection.removeListener('error');
+    }
+  }, [
+    state.socket,
+    token,
+    dispatchApplication,
+  ]);
+
+  React.useEffect(() => {
+    if (state.socket && activeCampaign) {
+      state.socket.emit('CAMPAIGN', activeCampaign.id);
+    }
+  }, [
+    state.socket,
+    activeCampaign,
+  ]);
 
   return (
     <Container>
