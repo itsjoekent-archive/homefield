@@ -1,11 +1,13 @@
 const traceError = require('./traceError');
 
-module.exports = (socket, logger, failedEvent) => {
+module.exports = (socket, logger) => {
   function onError(error) {
     const [trace, errorId] = traceError(error);
 
     logger.error(trace);
-    return new Error(`Encountered error authenticating with chat server. errorId=${errorId}`);
+
+    const clientMessage = error.isSocketError ? error.message : `Encountered error with chat server. errorId=${errorId}`;
+    socket.emit('exception', clientMessage);
   }
 
   return onError;

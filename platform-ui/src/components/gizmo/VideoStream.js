@@ -3,7 +3,7 @@ import styled, { css, keyframes } from 'styled-components';
 import Tooltip from 'components/Tooltip';
 import { useGizmoController } from 'components/gizmo/GizmoController';
 import { ReactComponent as MicrophoneIcon } from 'assets/microphone-icon-white.svg';
-import { ReactComponent as BroadcastIcon } from 'assets/broadcast-icon-white.svg';
+import { ReactComponent as CameraIcon } from 'assets/camera-icon-white.svg';
 
 const Container = styled.div`
   display: flex;
@@ -29,6 +29,53 @@ const Video = styled.video`
 
   object-fit: cover;
   object-position: center;
+`;
+
+const loadingFrames = keyframes`
+  0%, 100% {
+    transform: scale(0.0);
+  }
+
+  50% {
+    transform: scale(1.0);
+  }
+`;
+
+const LoadingOverlay = styled.div`
+  position: absolute;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 58px;
+  height: 58px;
+
+  border-radius: 50%;
+  overflow: hidden;
+
+  z-index: 2;
+
+  &:before, &:after {
+    content: '';
+    display: block;
+    position: absolute;
+
+    width: 100%;
+    height: 100%;
+
+    border-radius: 50%;
+
+    background-color: ${({ theme }) => theme.colors.purple.base};
+    opacity: 0.5;
+
+    animation: ${loadingFrames} 2.0s infinite ease-in-out;
+  }
+
+  &:after {
+    animation: ${loadingFrames} 2.0s infinite ease-in-out;
+    animation-delay: -1.0s;
+  }
 `;
 
 const AvatarOverlay = styled.img`
@@ -97,7 +144,7 @@ export default function VideoStream(props) {
   const {
     name,
     avatarUrl,
-    videoStream,
+    mediaStream,
     isMicrophoneMuted,
     isVideoDisabled,
     muteAudio = false,
@@ -108,19 +155,25 @@ export default function VideoStream(props) {
   const videoRef = React.useRef(null);
 
   React.useEffect(() => {
-    if (videoRef.current && videoStream && !videoRef.current.src) {
-      videoRef.current.srcObject = videoStream;
-      videoRef.current.play();
+    if (videoRef.current && mediaStream && !videoRef.current.src) {
+      videoRef.current.srcObject = mediaStream;
+
+      try {
+        videoRef.current.play();
+      } catch (error) {
+        console.error(error);
+      }
     }
   }, [
     videoRef.current,
-    videoStream,
+    mediaStream,
   ]);
 
   return (
     <Tooltip label={name} placement={isStick ? 'left' : 'top'} wait={0}>
       <Container>
-        {isVideoDisabled && <AvatarOverlay src={avatarUrl} />}
+        {!mediaStream && <LoadingOverlay />}
+        {(isVideoDisabled || !mediaStream) && <AvatarOverlay src={avatarUrl} />}
         <Video ref={videoRef} muted={muteAudio} />
         <IndicatorRow>
           {isMicrophoneMuted && (
@@ -130,7 +183,7 @@ export default function VideoStream(props) {
           )}
           {isVideoDisabled && (
             <Indicator>
-              <BroadcastIcon width={14} height={12} />
+              <CameraIcon width={14} height={12} />
             </Indicator>
           )}
         </IndicatorRow>

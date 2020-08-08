@@ -1,12 +1,12 @@
 import React from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import ToggleMicrophoneButton from 'components/gizmo/ToggleMicrophoneButton';
-import ToggleBroadcastButton from 'components/gizmo/ToggleBroadcastButton';
-import ToggleBroadcastConnectionButton from 'components/gizmo/ToggleBroadcastConnectionButton';
+import ToggleCameraButton from 'components/gizmo/ToggleCameraButton';
+import ToggleVideoChatConnectedButton from 'components/gizmo/ToggleVideoChatConnectedButton';
 import ToggleBreakoutRoomsButton from 'components/gizmo/ToggleBreakoutRoomsButton';
 import ToggleStickModeButton from 'components/gizmo/ToggleStickModeButton';
 import VideoConnectionPrompt from 'components/gizmo/VideoConnectionPrompt';
-import VideoStreamList from 'components/gizmo/VideoStreamList';
+import VideoChatRoom from 'components/gizmo/VideoChatRoom';
 import { useGizmoController } from 'components/gizmo/GizmoController';
 
 const fadeIn = keyframes`
@@ -116,7 +116,7 @@ export default function Popout() {
   const {
     isOpen,
     isStick,
-    isVideoConnected,
+    isVideoChatConnected,
   } = useGizmoController();
 
   const [hide, setHide] = React.useState(!isOpen);
@@ -152,26 +152,26 @@ export default function Popout() {
             <ToggleMicrophoneButton />
           </ControlButtonWrapper>
           <ControlButtonWrapper direction="bottom" end="last">
-            <ToggleBroadcastButton />
+            <ToggleCameraButton />
           </ControlButtonWrapper>
           <ControlButtonWrapper direction="bottom" end="last">
             <ToggleStickModeButton />
           </ControlButtonWrapper>
         </StickControls>
       )}
-      {!isStick && isVideoConnected && (
+      {!isStick && isVideoChatConnected && (
         <TopControlRow>
           <TopControlRowSection>
             <ControlButtonWrapper direction="right" end="last">
               <ToggleMicrophoneButton />
             </ControlButtonWrapper>
             <ControlButtonWrapper direction="right" end="last">
-              <ToggleBroadcastButton />
+              <ToggleCameraButton />
             </ControlButtonWrapper>
           </TopControlRowSection>
           <TopControlRowSection>
             <ControlButtonWrapper direction="left" end="first">
-              <ToggleBroadcastConnectionButton />
+              <ToggleVideoChatConnectedButton />
             </ControlButtonWrapper>
             <ControlButtonWrapper direction="left" end="first">
               <ToggleBreakoutRoomsButton />
@@ -182,11 +182,11 @@ export default function Popout() {
           </TopControlRowSection>
         </TopControlRow>
       )}
-      {!isStick && !isVideoConnected && (
+      {!isStick && !isVideoChatConnected && (
         <VideoConnectionPrompt />
       )}
-      {isVideoConnected && (
-        <VideoStreamList />
+      {isVideoChatConnected && (
+        <VideoChatRoom />
       )}
       <ChatContainer isStick={isStick}>
 

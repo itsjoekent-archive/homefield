@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { BlueButtonInverted } from 'components/Buttons';
-import { connectToVideo, useGizmoController } from 'components/gizmo/GizmoController';
+import { connectToVideoChat, useGizmoController } from 'components/gizmo/GizmoController';
 import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 
 const Container = styled.div`
@@ -52,7 +52,7 @@ export default function VideoConnectionPrompt() {
           return;
         }
 
-        dispatchGizmo(connectToVideo(stream));
+        dispatchGizmo(connectToVideoChat(stream));
       } catch(error) {
         console.error(error);
         pushSnackError(dispatchApplication, new Error('Failed to access your webcam and/or microphone'));

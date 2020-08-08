@@ -25,17 +25,23 @@ const io = socketio();
 
     const mongoDb = mongoClient.db();
 
-    const redisClient = redis.createClient({
-      url: REDIS_URL,
-    });
+    const redisPublishClient = redis.createClient({ url: REDIS_URL });
+    const redisSubscribeClient = redis.createClient({ url: REDIS_URL });
 
-    io.adapter(redisAdapter({ pubClient: redisClient, subClient: redisClient }));
+    const setRedisValue = promisify(redisPublishClient.set).bind(redisPublishClient);
+    const deleteRedisValue = promisify(redisPublishClient.del).bind(redisPublishClient);
 
-    redisClient.on('error', (error) => {
+    io.adapter(redisAdapter({ pubClient: redisPublishClient, subClient: redisSubscribeClient }));
+
+    redisPublishClient.on('error', (error) => {
       logger.error(error);
     });
 
-    io.use(async (socket, next) => {
+    redisSubscribeClient.on('error', (error) => {
+      logger.error(error);
+    });
+
+    io.use(async function(socket, next) {
       if (socket.token && socket.account) {
         return next();
       }
@@ -64,6 +70,8 @@ const io = socketio();
 
         socket.account = account;
 
+        await setRedisValue(`account-socket-${account._id.toString()}`, socket.id);
+
         return next();
       } catch (error) {
         const [trace, errorId] = traceError(error);
@@ -73,7 +81,7 @@ const io = socketio();
       }
     });
 
-    io.on('connection', (socket) => {
+    io.on('connection', function(socket) {
       logger.debug(`socket connected, socket-id=${socket.id} ip=${socket.handshake.address} account-id=${socket.account._id.toString()}`);
       socket.isAuthenticated = false;
 
@@ -82,14 +90,18 @@ const io = socketio();
         socket,
         logger,
         mongoDb,
-        redisClient,
+        redisPublishClient,
+        redisSubscribeClient,
       };
 
-      // set room/namespace (what is the difference?)
-      // pass rtc values
-      // chat
+      socket.on('disconnect', async function() {
+        logger.debug(`socket disconnected, socket-id=${socket.id} ip=${socket.handshake.address} account-id=${socket.account._id.toString()}`);
+        await deleteRedisValue(`account-socket-${socket.account._id.toString()}`);
+      });
 
-      // require('./events/auth')(eventInitArguments);
+      require('./events/join-campaign')(eventInitArguments);
+      require('./events/rtc')(eventInitArguments);
+      require('./events/video')(eventInitArguments);
     });
 
     logger.info(`listening on port ${PORT}`);
