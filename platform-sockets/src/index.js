@@ -29,6 +29,7 @@ const io = socketio();
     const redisSubscribeClient = redis.createClient({ url: REDIS_URL });
 
     const setRedisValue = promisify(redisPublishClient.set).bind(redisPublishClient);
+    const getRedisValue = promisify(redisPublishClient.get).bind(redisPublishClient);
     const deleteRedisValue = promisify(redisPublishClient.del).bind(redisPublishClient);
 
     io.adapter(redisAdapter({ pubClient: redisPublishClient, subClient: redisSubscribeClient }));
@@ -70,7 +71,18 @@ const io = socketio();
 
         socket.account = account;
 
-        await setRedisValue(`account-socket-${account._id.toString()}`, socket.id);
+        const socketKey = `account-socket-${account._id.toString()}`;
+
+        const existingSocketId = await getRedisValue(socketKey);
+        if (existingSocketId) {
+          const remoteDisconnect = promisify(io.of('/').adapter.remoteDisconnect);
+
+          try {
+            await remoteDisconnect(existingSocketId, true);
+          } catch (error) {}
+        }
+
+        await setRedisValue(socketKey, socket.id);
 
         return next();
       } catch (error) {

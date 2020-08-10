@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import io from 'socket.io-client';
-import adapter from 'webrtc-adapter';
+import 'webrtc-adapter';
 import FloatingButton from 'components/gizmo/FloatingButton';
 import Popout from 'components/gizmo/Popout';
 import { useApplicationContext, pushSnackError } from 'ApplicationContext';
@@ -10,8 +10,9 @@ const defaultGizmoControllerContext = {
   hasSocketDisconnected: false,
   isOpen: false,
   isStick: false,
-  isMuted: true,
+  isSpeakerMuted: false,
   isCameraDisabled: true,
+  isMicrophoneMuted: true,
   isVideoChatConnected: false,
   isViewingBreakoutRooms: false,
   mediaStream: null,
@@ -47,9 +48,14 @@ export function setStick(isStick) {
   return { type: SET_STICK, isStick };
 }
 
-const SET_MUTE = 'SET_MUTE';
-export function setMute(isMuted) {
-  return { type: SET_MUTE, isMuted };
+const SET_SPEAKER_MUTED = 'SET_SPEAKER_MUTED';
+export function setSpeakerMuted(isSpeakerMuted) {
+  return { type: SET_SPEAKER_MUTED, isSpeakerMuted };
+}
+
+const SET_MICROPHONE_MUTED = 'SET_MICROPHONE_MUTED';
+export function setMicrophoneMuted(isMicrophoneMuted) {
+  return { type: SET_MICROPHONE_MUTED, isMicrophoneMuted };
 }
 
 const SET_CAMERA_DISABLED = 'SET_CAMERA_DISABLED';
@@ -116,9 +122,13 @@ function gizmoReducer(state, action) {
       const { isCameraDisabled } = action;
       return { ...state, isCameraDisabled };
 
-    case SET_MUTE:
-      const { isMuted } = action;
-      return { ...state, isMuted };
+    case SET_SPEAKER_MUTED:
+      const { isSpeakerMuted } = action;
+      return { ...state, isSpeakerMuted };
+
+    case SET_MICROPHONE_MUTED:
+      const { isMicrophoneMuted } = action;
+      return { ...state, isMicrophoneMuted };
 
     case SET_OPEN:
       const { isOpen } = action;
@@ -126,8 +136,9 @@ function gizmoReducer(state, action) {
       return {
         ...state,
         isOpen,
-        isCameraDisabled: isOpen ? state.isCameraDisabled : false,
-        isMuted: isOpen ? state.isMuted : false,
+        isVideoChatConnected: isOpen ? state.isVideoChatConnected : false,
+        isCameraDisabled: isOpen ? state.isCameraDisabled : true,
+        isMicrophoneMuted: isOpen ? state.isMicrophoneMuted : true,
         isViewingBreakoutRooms: isOpen ? state.isViewingBreakoutRooms : false,
       };
 
@@ -218,15 +229,16 @@ export default function GizmoController(props) {
   ]);
 
   React.useEffect(() => {
-    if (state.socket && activeCampaign) {
+    if (state.socket && activeCampaign && activeCampaign.id) {
       state.socket.emit('join-campaign', activeCampaign.id);
 
-      state.socket.on('connect', () => {
+      function onConnect() {
         dispatch(setSocketDisconnected(false));
         state.socket.emit('join-campaign', activeCampaign.id);
-      });
+      }
 
-      return () => state.socket.removeListener('connect');
+      state.socket.on('connect', onConnect);
+      return () => state.socket.removeListener('connect', onConnect);
     }
   }, [
     dispatch,
@@ -235,13 +247,31 @@ export default function GizmoController(props) {
   ]);
 
   React.useEffect(() => {
+    if (!state.mediaStream) {
+      return;
+    }
+
+    state.mediaStream.getAudioTracks().forEach((track) => {
+      track.enabled = !state.isMicrophoneMuted;
+    });
+
+    state.mediaStream.getVideoTracks().forEach((track) => {
+      track.enabled = !state.isCameraDisabled;
+    });
+  }, [
+    state.mediaStream,
+    state.isMicrophoneMuted,
+    state.isCameraDisabled,
+  ]);
+
+  React.useEffect(() => {
     if (state.socket && !state.isVideoChatConnected) {
       state.socket.emit('leave-video-room');
-      // TODO: Disconnect peer streams
     }
   }, [
     state.socket,
     state.isVideoChatConnected,
+    state.isOpen,
   ]);
 
   return (

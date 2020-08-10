@@ -30,8 +30,6 @@ module.exports = ({ socket, logger, mongoDb, redisClient }) => {
     socket.activeCampaign = nextCampaignRoom;
     socket.join(nextCampaignRoom);
 
-    // TODO: Broadcast to room socket.account.id joined
-
     logger.debug(`${socket.account._id.toString()} joined ${nextCampaignRoom}`);
   }
 

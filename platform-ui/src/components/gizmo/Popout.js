@@ -2,6 +2,7 @@ import React from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import ToggleMicrophoneButton from 'components/gizmo/ToggleMicrophoneButton';
 import ToggleCameraButton from 'components/gizmo/ToggleCameraButton';
+import ToggleSpeakerButton from 'components/gizmo/ToggleSpeakerButton';
 import ToggleVideoChatConnectedButton from 'components/gizmo/ToggleVideoChatConnectedButton';
 import ToggleBreakoutRoomsButton from 'components/gizmo/ToggleBreakoutRoomsButton';
 import ToggleStickModeButton from 'components/gizmo/ToggleStickModeButton';
@@ -95,9 +96,11 @@ const ControlButtonWrapper = styled.span`
   ${({ direction, end }) => css`
     margin-${direction}: 8px;
 
-    &:${end}-child {
-      margin-${direction}: 0;
-    }
+    ${end && css`
+      &:${end}-child {
+        margin-${direction}: 0;
+      }
+    `}
   `}
 `;
 
@@ -148,13 +151,16 @@ export default function Popout() {
     <Container isOpen={isOpen} isStick={isStick}>
       {isStick && (
         <StickControls>
-          <ControlButtonWrapper direction="bottom" end="last">
+          <ControlButtonWrapper direction="bottom">
             <ToggleMicrophoneButton />
           </ControlButtonWrapper>
-          <ControlButtonWrapper direction="bottom" end="last">
+          <ControlButtonWrapper direction="bottom">
             <ToggleCameraButton />
           </ControlButtonWrapper>
-          <ControlButtonWrapper direction="bottom" end="last">
+          <ControlButtonWrapper direction="bottom">
+            <ToggleSpeakerButton />
+          </ControlButtonWrapper>
+          <ControlButtonWrapper direction="bottom">
             <ToggleStickModeButton />
           </ControlButtonWrapper>
         </StickControls>
@@ -167,6 +173,9 @@ export default function Popout() {
             </ControlButtonWrapper>
             <ControlButtonWrapper direction="right" end="last">
               <ToggleCameraButton />
+            </ControlButtonWrapper>
+            <ControlButtonWrapper direction="right" end="last">
+              <ToggleSpeakerButton />
             </ControlButtonWrapper>
           </TopControlRowSection>
           <TopControlRowSection>

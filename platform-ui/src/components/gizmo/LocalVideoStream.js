@@ -6,9 +6,9 @@ import { useApplicationContext } from 'ApplicationContext';
 export default function LocalVideoStream() {
   const {
     mediaStream,
-    isStick,
     isCameraDisabled,
-    isMuted,
+    isMicrophoneMuted,
+    isSpeakerMuted,
   } = useGizmoController();
 
   const {
@@ -26,8 +26,9 @@ export default function LocalVideoStream() {
       name={`${firstName}${lastName ? ` ${lastName}` : ''}`}
       avatarUrl={avatarUrl}
       mediaStream={mediaStream}
-      isMicrophoneMuted={isMuted}
-      isVideoDisabled={isCameraDisabled}
+      isMicrophoneMuted={isMicrophoneMuted}
+      isCameraDisabled={isCameraDisabled}
+      isSpeakerMuted={isSpeakerMuted}
       muteAudio
     />
   );

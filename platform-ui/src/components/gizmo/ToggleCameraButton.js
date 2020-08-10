@@ -8,7 +8,7 @@ import { ReactComponent as LightCameraIcon } from 'assets/camera-icon-white.svg'
 export default function ToggleCameraButton() {
   const { dispatch, isCameraDisabled, isStick } = useGizmoController();
 
-  const label = isCameraDisabled ? 'Resume camera' : 'Stop camera';
+  const label = isCameraDisabled ? 'Turn on camera' : 'Turn off camera';
 
   return (
     <Tooltip label={label} placement={isStick ? 'left' : 'top'}>

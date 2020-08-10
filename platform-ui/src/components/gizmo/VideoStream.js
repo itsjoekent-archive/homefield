@@ -1,11 +1,12 @@
 import React from 'react';
-import styled, { css, keyframes } from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import Tooltip from 'components/Tooltip';
 import { useGizmoController } from 'components/gizmo/GizmoController';
 import { ReactComponent as MicrophoneIcon } from 'assets/microphone-icon-white.svg';
 import { ReactComponent as CameraIcon } from 'assets/camera-icon-white.svg';
+import { ReactComponent as SpeakerIcon } from 'assets/speaker-icon-white.svg';
 
-const Container = styled.div`
+export const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -146,7 +147,8 @@ export default function VideoStream(props) {
     avatarUrl,
     mediaStream,
     isMicrophoneMuted,
-    isVideoDisabled,
+    isCameraDisabled,
+    isSpeakerMuted,
     muteAudio = false,
   } = props;
 
@@ -165,7 +167,6 @@ export default function VideoStream(props) {
       }
     }
   }, [
-    videoRef.current,
     mediaStream,
   ]);
 
@@ -173,7 +174,7 @@ export default function VideoStream(props) {
     <Tooltip label={name} placement={isStick ? 'left' : 'top'} wait={0}>
       <Container>
         {!mediaStream && <LoadingOverlay />}
-        {(isVideoDisabled || !mediaStream) && <AvatarOverlay src={avatarUrl} />}
+        {(isCameraDisabled || !mediaStream) && <AvatarOverlay src={avatarUrl} />}
         <Video ref={videoRef} muted={muteAudio} />
         <IndicatorRow>
           {isMicrophoneMuted && (
@@ -181,9 +182,14 @@ export default function VideoStream(props) {
               <MicrophoneIcon width={12} height={15} />
             </Indicator>
           )}
-          {isVideoDisabled && (
+          {isCameraDisabled && (
             <Indicator>
               <CameraIcon width={14} height={12} />
+            </Indicator>
+          )}
+          {isSpeakerMuted && (
+            <Indicator>
+              <SpeakerIcon width={12} height={10} />
             </Indicator>
           )}
         </IndicatorRow>

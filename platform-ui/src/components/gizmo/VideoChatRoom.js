@@ -1,5 +1,6 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { Container as VideoStreamContainer } from 'components/gizmo/VideoStream';
 import LocalVideoStream from 'components/gizmo/LocalVideoStream';
 import RemoteVideoStream from 'components/gizmo/RemoteVideoStream';
 import { setVideoParticipants, useGizmoController } from 'components/gizmo/GizmoController';
@@ -10,6 +11,29 @@ const Container = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  justify-content: center;
+
+  padding: 12px;
+  padding-top: 6px;
+
+  ${VideoStreamContainer} {
+    margin-left: 6px;
+    margin-right: 6px;
+  }
+
+  ${({ isStick }) => isStick && css`
+    flex-direction: column;
+    flex-grow: 1;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+
+    ${VideoStreamContainer} {
+      margin-left: 0;
+      margin-right: 0;
+      margin-bottom: 12px;
+    }
+  `}
 `;
 
 export default function VideoStreamList() {
@@ -21,6 +45,10 @@ export default function VideoStreamList() {
     socket,
     videoRoom,
     videoRoomParticipants,
+    isCameraDisabled,
+    isMicrophoneMuted,
+    isSpeakerMuted,
+    isStick,
   } = useGizmoController();
 
   const previousVideoRoom = usePrevious(videoRoom);
@@ -31,7 +59,7 @@ export default function VideoStreamList() {
     }
 
     if (isVideoChatConnected && videoRoom) {
-      socket.emit('join-video-room', videoRoom);
+      socket.emit('join-video-room', videoRoom, );
       return;
     }
 
@@ -68,6 +96,36 @@ export default function VideoStreamList() {
     videoRoom,
   ]);
 
+  React.useEffect(() => {
+    if (!isVideoChatConnected || !socket) {
+      return;
+    }
+
+    const selfParticipant = videoRoomParticipants.find((participant) => (
+      participant.id === account.id
+    ));
+
+    if (!videoRoomParticipants || !selfParticipant) {
+      return;
+    }
+
+    if (
+      selfParticipant.isCameraDisabled !== isCameraDisabled
+      || selfParticipant.isMicrophoneMuted !== isMicrophoneMuted
+      || selfParticipant.isSpeakerMuted !== isSpeakerMuted
+    ) {
+      socket.emit('video-room-status-update', isMicrophoneMuted, isCameraDisabled, isSpeakerMuted);
+    }
+  }, [
+    account.id,
+    isVideoChatConnected,
+    socket,
+    videoRoomParticipants,
+    isCameraDisabled,
+    isMicrophoneMuted,
+    isSpeakerMuted,
+  ]);
+
   const remoteParticipants = videoRoomParticipants
     && videoRoomParticipants.filter((participant) => participant.id !== account.id);
 
@@ -75,7 +133,7 @@ export default function VideoStreamList() {
     .find((participant) => participant.id === account.id) || {};
 
   return (
-    <Container>
+    <Container isStick={isStick}>
       <LocalVideoStream />
       {remoteParticipants && remoteParticipants.map((participant) => (
         <RemoteVideoStream

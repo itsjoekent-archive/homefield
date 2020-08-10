@@ -23,16 +23,19 @@ export default function RemoteVideoStream(props) {
       lastName,
       avatarUrl,
       joinedRoomAt,
+      isMicrophoneMuted,
+      isCameraDisabled,
+      isSpeakerMuted,
     },
   } = props;
 
   const previousId = usePrevious(id);
 
   const {
-    dispatch,
     mediaStream,
     socket,
     videoRoom,
+    isSpeakerMuted: isLocalMuted,
   } = useGizmoController();
 
   const [isPeerConntected, setIsPeerConntected] = React.useState(false);
@@ -77,7 +80,7 @@ export default function RemoteVideoStream(props) {
 
     function onIceCandidate(event) {
       if (event.candidate) {
-        socket.emit('rtc-ice-candidate', id, event.candidate.toJSON());
+        socket.emit('rtc-ice-candidate', id, event.candidate);
       }
     }
 
@@ -107,7 +110,7 @@ export default function RemoteVideoStream(props) {
     async function makeOffer() {
       const offer = await peerConnection.current.createOffer();
       await peerConnection.current.setLocalDescription(offer);
-      socket.emit(`rtc-offer-sent`, id, offer.toJSON());
+      socket.emit(`rtc-offer-sent`, id, offer);
     }
 
     if (localJoinedRoomAt > joinedRoomAt && !hasMadeOffer.current) {
@@ -133,7 +136,7 @@ export default function RemoteVideoStream(props) {
       const answer = await peerConnection.current.createAnswer();
       await peerConnection.current.setLocalDescription(answer);
 
-      socket.emit(`rtc-answer-sent`, id, answer.toJSON());
+      socket.emit(`rtc-answer-sent`, id, answer);
     }
 
     const answerEvent = `rtc-answer-from-${id}`;
@@ -173,9 +176,10 @@ export default function RemoteVideoStream(props) {
       name={`${firstName}${lastName ? ` ${lastName}` : ''}`}
       avatarUrl={avatarUrl}
       mediaStream={isPeerConntected ? peerMediaStream.current : null}
-      isMicrophoneMuted={false}
-      isVideoDisabled={false}
-      muteAudio
+      isMicrophoneMuted={!!isMicrophoneMuted}
+      isCameraDisabled={!!isCameraDisabled}
+      isSpeakerMuted={!!isSpeakerMuted}
+      muteAudio={isLocalMuted}
     />
   );
 }
