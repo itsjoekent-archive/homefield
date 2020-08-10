@@ -17,8 +17,9 @@ const defaultGizmoControllerContext = {
   isViewingBreakoutRooms: false,
   mediaStream: null,
   socket: null,
-  videoRoom: 'default',
+  videoRoom: 'main',
   videoRoomParticipants: [],
+  chatRoom: 'general',
 };
 
 export const GizmoControllerContext = React.createContext(defaultGizmoControllerContext);

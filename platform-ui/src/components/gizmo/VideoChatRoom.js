@@ -10,26 +10,27 @@ import { useApplicationContext } from 'ApplicationContext';
 const Container = styled.div`
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+
+  overflow-x: scroll;
 
   padding: 12px;
   padding-top: 6px;
 
   ${VideoStreamContainer} {
-    margin-left: 6px;
-    margin-right: 6px;
+    margin-right: 12px;
   }
 
   ${({ isStick }) => isStick && css`
     flex-direction: column;
     flex-grow: 1;
-    flex-wrap: nowrap;
     align-items: center;
-    justify-content: flex-start;
+
+    overflow-x: auto;
+    overflow-y: scroll;
 
     ${VideoStreamContainer} {
-      margin-left: 0;
       margin-right: 0;
       margin-bottom: 12px;
     }

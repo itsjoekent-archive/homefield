@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Link, useNavigate } from '@reach/router';
 import { BlueButton, MutedButtonInverted } from 'components/Buttons';
 import { useApplicationContext, pushSnackError } from 'ApplicationContext';
@@ -44,7 +44,10 @@ const Container = styled.button`
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-bottom: 5px solid ${({ theme }) => theme.colors.mono.black};
-    transform: rotate(180deg);
+
+    ${({ isOpen }) => !isOpen && css`
+      transform: rotate(180deg);
+    `}
   }
 `;
 
@@ -213,7 +216,7 @@ export default function NavMenu() {
   }
 
   return (
-    <Container ref={containerRef} onClick={() => setIsOpen(!isOpen)}>
+    <Container ref={containerRef} isOpen={isOpen} onClick={() => setIsOpen(!isOpen)}>
       <Avatar>
         <img alt="Profile avatar" src={avatarUrl} />
       </Avatar>

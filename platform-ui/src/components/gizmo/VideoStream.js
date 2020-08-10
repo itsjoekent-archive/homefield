@@ -1,25 +1,9 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
-import Tooltip from 'components/Tooltip';
 import { useGizmoController } from 'components/gizmo/GizmoController';
 import { ReactComponent as MicrophoneIcon } from 'assets/microphone-icon-white.svg';
 import { ReactComponent as CameraIcon } from 'assets/camera-icon-white.svg';
 import { ReactComponent as SpeakerIcon } from 'assets/speaker-icon-white.svg';
-
-export const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  position: relative;
-
-  width: 64px;
-  height: 64px;
-
-  border-radius: 50%;
-
-  background-color: ${({ theme }) => theme.colors.mono.white};
-`;
 
 const Video = styled.video`
   width: 58px;
@@ -30,6 +14,31 @@ const Video = styled.video`
 
   object-fit: cover;
   object-position: center;
+`;
+
+const NameOverlay = styled.div`
+  display: none;
+  justify-content: center;
+  align-items: center;
+  width: 104%;
+  height: 104%;
+
+  position: absolute;
+  z-index: 3;
+
+  border-radius: 50%;
+
+  background-color: ${({ theme }) => theme.colors.mono[1000]};
+`;
+
+const Name = styled.p`
+  font-family: ${({ theme }) => theme.font};
+  font-size: 11px;
+  font-weight: ${({ theme }) => theme.type.weight.label};
+  color: ${({ theme }) => theme.colors.mono.white};
+  text-align: center;
+  word-break: break-word;
+  line-height: 1.1;
 `;
 
 const loadingFrames = keyframes`
@@ -141,6 +150,32 @@ const Indicator = styled.div`
   }
 `;
 
+export const Container = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+
+  width: 64px;
+  min-width: 64px;
+  height: 64px;
+
+  border-radius: 50%;
+
+  background-color: ${({ theme }) => theme.colors.mono.white};
+
+  &:hover {
+    ${NameOverlay} {
+      display: flex;
+    }
+
+    ${IndicatorRow} {
+      display: none;
+    }
+  }
+`;
+
 export default function VideoStream(props) {
   const {
     name,
@@ -171,29 +206,30 @@ export default function VideoStream(props) {
   ]);
 
   return (
-    <Tooltip label={name} placement={isStick ? 'left' : 'top'} wait={0}>
-      <Container>
-        {!mediaStream && <LoadingOverlay />}
-        {(isCameraDisabled || !mediaStream) && <AvatarOverlay src={avatarUrl} />}
-        <Video ref={videoRef} muted={muteAudio} />
-        <IndicatorRow>
-          {isMicrophoneMuted && (
-            <Indicator>
-              <MicrophoneIcon width={12} height={15} />
-            </Indicator>
-          )}
-          {isCameraDisabled && (
-            <Indicator>
-              <CameraIcon width={14} height={12} />
-            </Indicator>
-          )}
-          {isSpeakerMuted && (
-            <Indicator>
-              <SpeakerIcon width={12} height={10} />
-            </Indicator>
-          )}
-        </IndicatorRow>
-      </Container>
-    </Tooltip>
+    <Container>
+      <NameOverlay>
+        <Name>{name}</Name>
+      </NameOverlay>
+      {!mediaStream && <LoadingOverlay />}
+      {(isCameraDisabled || !mediaStream) && <AvatarOverlay src={avatarUrl} />}
+      <Video ref={videoRef} muted={muteAudio} />
+      <IndicatorRow>
+        {isMicrophoneMuted && (
+          <Indicator>
+            <MicrophoneIcon width={12} height={15} />
+          </Indicator>
+        )}
+        {isCameraDisabled && (
+          <Indicator>
+            <CameraIcon width={14} height={12} />
+          </Indicator>
+        )}
+        {isSpeakerMuted && (
+          <Indicator>
+            <SpeakerIcon width={12} height={10} />
+          </Indicator>
+        )}
+      </IndicatorRow>
+    </Container>
   );
 }

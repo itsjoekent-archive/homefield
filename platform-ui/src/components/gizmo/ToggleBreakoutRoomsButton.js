@@ -11,7 +11,7 @@ export default function ToggleBreakoutRoomsButton() {
   const label = isViewingBreakoutRooms ? 'Hide breakout rooms' : 'Breakout rooms';
 
   return (
-    <Tooltip label={label} placement="top">
+    <Tooltip label={label} placement="left">
       <GizmoPushButton
         aria-label={label}
         strike={isViewingBreakoutRooms}

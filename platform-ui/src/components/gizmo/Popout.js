@@ -8,6 +8,7 @@ import ToggleBreakoutRoomsButton from 'components/gizmo/ToggleBreakoutRoomsButto
 import ToggleStickModeButton from 'components/gizmo/ToggleStickModeButton';
 import VideoConnectionPrompt from 'components/gizmo/VideoConnectionPrompt';
 import VideoChatRoom from 'components/gizmo/VideoChatRoom';
+import ChatNavBar from 'components/gizmo/ChatNavBar';
 import { useGizmoController } from 'components/gizmo/GizmoController';
 
 const fadeIn = keyframes`
@@ -62,20 +63,46 @@ const Container = styled.div`
   `}
 `;
 
-const ChatContainer = styled.div`
+const crateOpenFrames = keyframes`
+  from {
+    opacity: 0;
+    flex-grow: unset;
+    height: 0;
+  }
+
+  to {
+    opacity: 1;
+    flex-grow: 1;
+    height: auto;
+  }
+`;
+
+const crateCloseFrames = keyframes`
+  from {
+    opacity: 1;
+    flex-grow: 1;
+    height: auto;
+  }
+
+  to {
+    opacity: 0;
+    flex-grow: unset;
+    height: 0;
+  }
+`;
+
+const Crate = styled.div`
   width: 100%;
   flex-grow: 1;
-
-  transition: flex-grow 1s;
 
   background-color: ${({ theme }) => theme.colors.mono.white};
 
   border-bottom-left-radius: ${({ theme }) => theme.borderRadius};
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
 
-  ${({ isStick }) => isStick && css`
-    flex-grow: 0;
-  `}
+  overflow: hidden;
+
+  animation: ${({ isStick }) => isStick ? crateCloseFrames : crateOpenFrames} 1s forwards;
 `;
 
 const TopControlRow = styled.div`
@@ -120,6 +147,7 @@ export default function Popout() {
     isOpen,
     isStick,
     isVideoChatConnected,
+    isViewingBreakoutRooms,
   } = useGizmoController();
 
   const [hide, setHide] = React.useState(!isOpen);
@@ -197,9 +225,14 @@ export default function Popout() {
       {isVideoChatConnected && (
         <VideoChatRoom />
       )}
-      <ChatContainer isStick={isStick}>
-
-      </ChatContainer>
+      <Crate isStick={isStick}>
+        {isViewingBreakoutRooms && (
+          <React.Fragment />
+        )}
+        {!isViewingBreakoutRooms && (
+          <ChatNavBar />
+        )}
+      </Crate>
     </Container>
   );
 }
