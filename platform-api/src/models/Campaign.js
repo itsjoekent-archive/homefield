@@ -18,10 +18,11 @@ const endProcessOnFail = require('../utils/endProcessOnFail');
  * @param {String} dialer.iframe URL of the iframe to embed for the dialer tool
  * @param {String} sms.iframe URL of the iframe to embed for the SMS tool
  * @param {String} wiki Markdown content for volunteer resources
- * @param {Array<String>} chat.channels Chat channel IDs that belong to this campaign
- * @param {Array<Object>} chat.customEmojis Custom chat emojis in this campaign
- * @param {String} chat.customEmojis[].symbol Unique symbol for this emoji
- * @param {String} chat.customEmojis[].fileUrl Url that references the emoji image
+ * @param {Array<String>} chatChannels Chat channel names for this campaign
+ * @param {Array<String>} videoRooms Video room names for this campaign
+ * @param {Array<Object>} customEmojis Custom chat emojis in this campaign
+ * @param {String} customEmojis[].symbol Unique symbol for this emoji
+ * @param {String} customEmojis[].fileUrl Url that references the emoji image
  * @param {Boolean} isPublic Flag indicting if volunteers can sign up for this campaign
  * @param {Date} createdAt Time the campaign was created
  * @param {Date} updatedAt Time the campaign was last updated
@@ -149,10 +150,22 @@ module.exports = function(db) {
         iframe: null,
       },
       wiki: null,
-      chat: {
-        channels: [],
-        customEmojis: [],
-      },
+      chatChannels: [
+        { title: 'general', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+        { title: 'welcome', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+        { title: 'help', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+      ],
+      videoRooms: [
+        { title: 'Virtual HQ', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+        { title: 'Phonebanking', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+        { title: 'Texting', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+        { title: 'Breakout 1', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+        { title: 'Breakout 2', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+        { title: 'Breakout 3', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+        { title: 'Breakout 4', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+        { title: 'Breakout 5', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit' },
+      ],
+      customEmojis: [],
       isPublic: false,
       createdAt: Date.now(),
       updatedAt: Date.now(),

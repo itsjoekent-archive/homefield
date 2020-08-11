@@ -17,6 +17,7 @@ const Container = styled.div`
 
   padding: 12px;
   padding-top: 6px;
+  min-height: 82px;
 
   ${VideoStreamContainer} {
     margin-right: 12px;
@@ -65,7 +66,6 @@ export default function VideoStreamList() {
     }
 
     if (isVideoChatConnected && (videoRoom !== previousVideoRoom)) {
-      // TODO: Disconnect from peer streams
       socket.emit('join-video-room', videoRoom);
       return;
     }

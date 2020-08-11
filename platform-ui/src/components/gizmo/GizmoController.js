@@ -7,6 +7,7 @@ import Popout from 'components/gizmo/Popout';
 import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 
 const defaultGizmoControllerContext = {
+  activeCampaign: null,
   hasSocketDisconnected: false,
   isOpen: false,
   isStick: false,
@@ -14,10 +15,10 @@ const defaultGizmoControllerContext = {
   isCameraDisabled: true,
   isMicrophoneMuted: true,
   isVideoChatConnected: false,
-  isViewingBreakoutRooms: false,
+  isViewingVideoRooms: false,
   mediaStream: null,
   socket: null,
-  videoRoom: 'main',
+  videoRoom: null,
   videoRoomParticipants: [],
   chatRoom: 'general',
 };
@@ -37,6 +38,11 @@ export function useGizmoController() {
   const context = React.useContext(GizmoControllerContext);
 
   return context;
+}
+
+const SET_ACTIVE_CAMPAIGN = 'SET_ACTIVE_CAMPAIGN';
+function setActiveCampaign(activeCampaign) {
+  return { type: SET_ACTIVE_CAMPAIGN, activeCampaign };
 }
 
 const SET_OPEN = 'SET_OPEN';
@@ -74,9 +80,9 @@ export function disconnectFromVideoChat() {
   return { type: DISCONNECT_VIDEO_CHAT };
 }
 
-const SET_VIEWING_BREAKOUT_ROOMS = 'SET_VIEWING_BREAKOUT_ROOMS';
-export function setViewingBreakoutRooms(isViewingBreakoutRooms) {
-  return { type: SET_VIEWING_BREAKOUT_ROOMS, isViewingBreakoutRooms };
+const SET_VIEWING_VIDEO_ROOMS = 'SET_VIEWING_VIDEO_ROOMS';
+export function setViewingVideoRooms(isViewingVideoRooms) {
+  return { type: SET_VIEWING_VIDEO_ROOMS, isViewingVideoRooms };
 }
 
 const SET_SOCKET = 'SET_SOCKET';
@@ -114,8 +120,33 @@ function gizmoReducer(state, action) {
       return {
         ...state,
         isVideoChatConnected: false,
+        isViewingVideoRooms: false,
         mediaStream: null,
-        videoRoom: 'default',
+        videoRoom: null,
+        videoRoomParticipants: [],
+      };
+
+    case SET_ACTIVE_CAMPAIGN:
+      const { activeCampaign } = action;
+
+      if (!activeCampaign) {
+        return {
+          ...state,
+          activeCampaign,
+          chatRoom: null,
+          videoRoom: null,
+          isVideoChatConnected: false,
+          isViewingVideoRooms: false,
+          mediaStream: null,
+          videoRoomParticipants: [],
+        };
+      }
+
+      return {
+        ...state,
+        activeCampaign,
+        chatRoom: activeCampaign.chatChannels[0].title,
+        videoRoom: activeCampaign.videoRooms[0].title,
         videoRoomParticipants: [],
       };
 
@@ -140,7 +171,7 @@ function gizmoReducer(state, action) {
         isVideoChatConnected: isOpen ? state.isVideoChatConnected : false,
         isCameraDisabled: isOpen ? state.isCameraDisabled : true,
         isMicrophoneMuted: isOpen ? state.isMicrophoneMuted : true,
-        isViewingBreakoutRooms: isOpen ? state.isViewingBreakoutRooms : false,
+        isViewingVideoRooms: isOpen ? state.isViewingVideoRooms : false,
       };
 
     case SET_SOCKET:
@@ -155,9 +186,9 @@ function gizmoReducer(state, action) {
       const { isStick } = action;
       return { ...state, isStick };
 
-    case SET_VIEWING_BREAKOUT_ROOMS:
-      const { isViewingBreakoutRooms } = action;
-      return { ...state, isViewingBreakoutRooms };
+    case SET_VIEWING_VIDEO_ROOMS:
+      const { isViewingVideoRooms } = action;
+      return { ...state, isViewingVideoRooms };
 
     case SET_VIDEO_ROOM:
       const { videoRoom } = action;
@@ -180,7 +211,13 @@ function gizmoReducer(state, action) {
 export default function GizmoController(props) {
   const { activeCampaign } = props;
 
-  const [state, dispatch] = React.useReducer(gizmoReducer, defaultGizmoControllerContext);
+  const [state, dispatch] = React.useReducer(
+    gizmoReducer,
+    gizmoReducer(
+      defaultGizmoControllerContext,
+      setActiveCampaign(activeCampaign),
+    ),
+  );
 
   const contextValue = {
     ...state,
@@ -191,6 +228,19 @@ export default function GizmoController(props) {
     authentication: { token },
     dispatch: dispatchApplication,
   } = useApplicationContext();
+
+  React.useEffect(() => {
+    if (!activeCampaign) {
+      return;
+    }
+
+    if (!state.activeCampaign || state.activeCampaign.id !== activeCampaign.id) {
+      dispatch(setActiveCampaign(activeCampaign));
+    }
+  }, [
+    activeCampaign,
+    state.activeCampaign,
+  ]);
 
   React.useEffect(() => {
     let connection = state.socket;

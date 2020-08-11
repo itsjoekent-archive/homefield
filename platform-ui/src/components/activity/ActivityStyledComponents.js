@@ -24,9 +24,6 @@ export const Avatar = styled.img`
   object-position: center;
 
   border-radius: 50%;
-  ${({ isProfile, theme }) => isProfile && css`
-    border: 4px solid ${theme.colors.blue.base};
-  `}
 
   margin-right: 16px;
 

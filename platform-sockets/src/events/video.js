@@ -1,12 +1,14 @@
 const { promisify } = require('util');
+const { ObjectID } = require('mongodb');
 
 const SocketError = require('../utils/socketError');
 const socketErrorHandler = require('../utils/socketErrorHandler');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 
+const Campaign = require('../../lib/models/Campaign');
 const transformAccount = require('../../lib/transformers/transformAccount');
 
-module.exports = ({ io, socket, logger, redisPublishClient }) => {
+module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
   const hashSet = promisify(redisPublishClient.hset).bind(redisPublishClient);
   const hashGet = promisify(redisPublishClient.hget).bind(redisPublishClient);
   const hashDelete = promisify(redisPublishClient.hdel).bind(redisPublishClient);
@@ -134,4 +136,33 @@ module.exports = ({ io, socket, logger, redisPublishClient }) => {
   }
 
   socket.on('disconnect', wrapAsyncFunction(onDisconnect, socketErrorHandler(socket, logger)));
+
+  async function allVideoRooms() {
+    if (!socket.account) {
+      throw new SocketError('Not authenticated');
+    }
+
+    if (!socket.activeCampaign) {
+      throw new SocketError('No campaign specified for video chat');
+    }
+
+    const campaignId = ObjectID(socket.activeCampaign.replace('campaign-', ''));
+    const campaign = await Campaign(mongoDb).getCampaignById(campaignId);
+
+    const roomNames = campaign.videoRooms.map((room) => room.title);
+
+    const roomsEncoded = await Promise.all(roomNames.map((title) => {
+      const hashKey = makeRoomHashKey(socket, title);
+      return hashGetAllValues(hashKey);
+    }));
+
+    const data = roomsEncoded.reduce((acc, participants, index) => ({
+      ...acc,
+      [roomNames[index]]: participants.map(JSON.parse),
+    }), {});
+
+    socket.emit('all-video-rooms-data', data);
+  }
+
+  socket.on('all-video-rooms', wrapAsyncFunction(allVideoRooms, socketErrorHandler(socket, logger)))
 }

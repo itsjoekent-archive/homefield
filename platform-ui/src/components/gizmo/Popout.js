@@ -4,10 +4,11 @@ import ToggleMicrophoneButton from 'components/gizmo/ToggleMicrophoneButton';
 import ToggleCameraButton from 'components/gizmo/ToggleCameraButton';
 import ToggleSpeakerButton from 'components/gizmo/ToggleSpeakerButton';
 import ToggleVideoChatConnectedButton from 'components/gizmo/ToggleVideoChatConnectedButton';
-import ToggleBreakoutRoomsButton from 'components/gizmo/ToggleBreakoutRoomsButton';
+import ToggleVideoRoomsButton from 'components/gizmo/ToggleVideoRoomsButton';
 import ToggleStickModeButton from 'components/gizmo/ToggleStickModeButton';
 import VideoConnectionPrompt from 'components/gizmo/VideoConnectionPrompt';
 import VideoChatRoom from 'components/gizmo/VideoChatRoom';
+import VideoRoomBrowser from 'components/gizmo/VideoRoomBrowser';
 import ChatNavBar from 'components/gizmo/ChatNavBar';
 import { useGizmoController } from 'components/gizmo/GizmoController';
 
@@ -147,7 +148,7 @@ export default function Popout() {
     isOpen,
     isStick,
     isVideoChatConnected,
-    isViewingBreakoutRooms,
+    isViewingVideoRooms,
   } = useGizmoController();
 
   const [hide, setHide] = React.useState(!isOpen);
@@ -211,7 +212,7 @@ export default function Popout() {
               <ToggleVideoChatConnectedButton />
             </ControlButtonWrapper>
             <ControlButtonWrapper direction="left" end="first">
-              <ToggleBreakoutRoomsButton />
+              <ToggleVideoRoomsButton />
             </ControlButtonWrapper>
             <ControlButtonWrapper direction="left" end="first">
               <ToggleStickModeButton />
@@ -226,10 +227,10 @@ export default function Popout() {
         <VideoChatRoom />
       )}
       <Crate isStick={isStick}>
-        {isViewingBreakoutRooms && (
-          <React.Fragment />
+        {isViewingVideoRooms && (
+          <VideoRoomBrowser />
         )}
-        {!isViewingBreakoutRooms && (
+        {!isViewingVideoRooms && (
           <ChatNavBar />
         )}
       </Crate>
