@@ -5,13 +5,6 @@ import ago from 's-ago';
 import { useGizmoController } from 'components/gizmo/GizmoController';
 import usePrevious from 'hooks/usePrevious';
 
-// @ notifications
-// is typing...
-// unfurl
-// get initial messages
-// load more messages when you scroll up / reach "end"
-// direct message support
-
 const Container = styled.div`
   display: flex;
   flex-direction: column-reverse;
@@ -119,7 +112,7 @@ export default function ChatHistory(props) {
         const allMessages = [...existingMessages, ...uniqueNewMessages];
 
         return allMessages
-          .filter((message) => message.room === chatRoom)
+          .filter((message) => message.channel === chatRoom)
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       });
     }
@@ -134,7 +127,7 @@ export default function ChatHistory(props) {
   ]);
 
   function formatName(message) {
-    return `${message.account.firstName}${message.account.lastName ? ` ${message.account.lastName} ` : ''}`;
+    return `${message.from.firstName}${message.from.lastName ? ` ${message.from.lastName} ` : ''}`;
   }
 
   function formatTimestamp(message) {
@@ -168,7 +161,7 @@ export default function ChatHistory(props) {
     <Container>
       {messages.map((message) => (
         <ChatMessageRow key={message.id}>
-          <Avatar src={message.account.avatarUrl} />
+          <Avatar src={message.from.avatarUrl} />
           <MessageColumn>
             <MessageDetails>
               <Name>{formatName(message)}</Name>

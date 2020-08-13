@@ -74,7 +74,7 @@ export default function VideoConnectionPrompt() {
   return (
     <Container>
       <Header>Join The Campaign Video Chat</Header>
-      <Paragraph>Get in-depth trainings, chat with fellow volunteers, and get 1:1 help from campaign organizers.</Paragraph>
+      <Paragraph>Chat with other volunteers of this campaign and get 1:1 help from campaign organizers.</Paragraph>
       <BlueButtonInverted onClick={() => setRequestedMedia(true)}>
         Connect
       </BlueButtonInverted>

@@ -2,7 +2,7 @@ const transformAccount = require('./transformAccount');
 const transformCampaign = require('./transformCampaign');
 
 /**
- * Return account properties based on API permissions.
+ * Return activity properties based on API permissions.
  *
  * @param {Activity} activity
  * @param {Account} authorizer
@@ -24,7 +24,7 @@ module.exports = function transformActivity(activity, authorizer) {
 
   const transformedAccount = Array.isArray(account)
     ? transformAccount(account[0], authorizer)
-    : transformAccount(account);
+    : transformAccount(account, authorizer);
 
   const transformedCampaign = Array.isArray(campaign)
     ? transformCampaign(campaign[0], authorizer)

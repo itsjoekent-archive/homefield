@@ -1,6 +1,10 @@
+const { ObjectID } = require('mongodb');
+
 const SocketError = require('../utils/socketError');
 const socketErrorHandler = require('../utils/socketErrorHandler');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
+
+const Campaign = require('../../lib/models/Campaign');
 
 module.exports = ({ socket, logger, mongoDb, redisClient }) => {
   async function onJoinCampaign(campaignId) {
@@ -28,6 +32,8 @@ module.exports = ({ socket, logger, mongoDb, redisClient }) => {
     }
 
     socket.activeCampaign = nextCampaignRoom;
+    socket.activeCampaignData = await Campaign(mongoDb).getCampaignById(ObjectID(campaignId));
+
     socket.join(nextCampaignRoom);
 
     logger.debug(`${socket.account._id.toString()} joined ${nextCampaignRoom}`);

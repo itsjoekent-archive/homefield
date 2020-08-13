@@ -6,7 +6,9 @@ const socketErrorHandler = require('../utils/socketErrorHandler');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 
 const Campaign = require('../../lib/models/Campaign');
+const ChatMessage = require('../../lib/models/ChatMessage');
 const transformAccount = require('../../lib/transformers/transformAccount');
+const transformChatMessage = require('../../lib/transformers/transformChatMessage');
 
 module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
   const hashSet = promisify(redisPublishClient.hset).bind(redisPublishClient);
@@ -45,6 +47,8 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
     logger.debug(`${socket.account._id.toString()} joined ${nextChatRoom}`);
 
     socket.activeChatRoom = nextChatRoom;
+    socket.chatChannelName = chatRoom;
+
     socket.join(socket.activeChatRoom);
 
     const value = JSON.stringify(transformAccount(socket.account, null));
@@ -52,7 +56,17 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
 
     await sync();
 
-    // TODO: Send all prior messages to the joining client
+    const previousChatMessages = await ChatMessage(mongoDb).getPaginatedChatMessages(
+      socket.activeCampaignData,
+      socket.chatChannelName,
+    );
+
+    if (previousChatMessages && previousChatMessages.data) {
+      const previousChatMessagesTransformed = previousChatMessages.data
+        .map((chatMessage) => transformChatMessage(chatMessage, null));
+
+      socket.emit('incoming-chat-messages', previousChatMessagesTransformed);
+    }
   }
 
   socket.on('join-chat', wrapAsyncFunction(onJoinChat, socketErrorHandler(socket, logger)));
@@ -66,24 +80,29 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
       throw new SocketError('Not authenticated');
     }
 
-    if (!socket.activeCampaign) {
+    if (!socket.activeCampaign || !socket.activeCampaignData) {
       throw new SocketError('No campaign specified for the message');
     }
 
-    if (!socket.activeChatRoom) {
+    if (!socket.activeChatRoom || !socket.chatChannelName) {
       throw new SocketError('No chat room specified for the message');
     }
 
-    logger.debug(`${socket.account._id.toString()} sent message to ${socket.activeChatRoom}`);
+    const message = await ChatMessage(mongoDb).createChatMessage(
+      socket.account,
+      socket.activeCampaignData,
+      socket.chatChannelName,
+      messageText,
+    );
 
-    // TEMPORARY...
-    io.in(socket.activeChatRoom).emit('incoming-chat-messages', [{
-      id: Math.round(Math.random() * 1000000),
-      account: transformAccount(socket.account, null),
-      text: messageText,
-      room: socket.activeChatRoom.replace(`${socket.activeCampaign}-chat-`, ''),
-      createdAt: Date.now(),
-    }]);
+    const outgoingMessage = {
+      ...transformChatMessage(message, null),
+      from: transformAccount(socket.account, null),
+    };
+
+    io.in(socket.activeChatRoom).emit('incoming-chat-messages', [outgoingMessage]);
+
+    logger.debug(`${socket.account._id.toString()} sent message to ${socket.activeChatRoom}`);
   }
 
   socket.on('outgoing-chat-message', wrapAsyncFunction(onOutgoingChatMessage, socketErrorHandler(socket, logger)));

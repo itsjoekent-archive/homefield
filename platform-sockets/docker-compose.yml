@@ -10,7 +10,7 @@ services:
       - "5001:5001"
     volumes:
       - ./src:/usr/src/app/src:cached
-      - ../platform-api:/usr/src/platform-api:cached
+      - ../platform-api/src:/usr/src/app/lib:cached
     environment:
       - PORT=5001
       - MONGODB_URL=mongodb://admin:secret@mongo:27017
