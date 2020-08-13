@@ -21,11 +21,11 @@ module.exports = ({ io, socket, logger, redisPublishClient }) => {
       throw new SocketError('No campaign specified for video chat');
     }
 
-    if (!socket.activeRoom) {
+    if (!socket.activeVideoRoom) {
       throw new SocketError('Not connected to a video room');
     }
 
-    const videoRoomParticipantsEncoded = await hashGetAllValues(`${socket.activeCampaign}-video-${socket.activeRoom}`);
+    const videoRoomParticipantsEncoded = await hashGetAllValues(`${socket.activeCampaign}-video-${socket.activeVideoRoom}`);
     const videoRoomParticipants = videoRoomParticipantsEncoded.map(JSON.parse);
 
     if (!videoRoomParticipants.find((participant) => participant.id === accountId)) {

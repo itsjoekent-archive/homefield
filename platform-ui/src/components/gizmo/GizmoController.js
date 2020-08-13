@@ -8,7 +8,6 @@ import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 
 const defaultGizmoControllerContext = {
   activeCampaign: null,
-  hasSocketDisconnected: false,
   isOpen: false,
   isStick: false,
   isSpeakerMuted: false,
@@ -20,7 +19,11 @@ const defaultGizmoControllerContext = {
   socket: null,
   videoRoom: null,
   videoRoomParticipants: [],
-  chatRoom: 'general',
+  chatRoom: null,
+  directMessage: null,
+  isViewingChatRooms: false,
+  isViewingDirectMessages: false,
+  chatRoomParticipants: [],
 };
 
 export const GizmoControllerContext = React.createContext(defaultGizmoControllerContext);
@@ -90,11 +93,6 @@ function setSocket(socket) {
   return { type: SET_SOCKET, socket };
 }
 
-const SET_SOCKET_DISCONNECTED = 'SET_SOCKET_DISCONNECTED';
-function setSocketDisconnected(hasSocketDisconnected) {
-  return { type: SET_SOCKET_DISCONNECTED, hasSocketDisconnected };
-}
-
 const SET_VIDEO_ROOM = 'SET_VIDEO_ROOM';
 export function setVideoRoom(videoRoom) {
   return { type: SET_VIDEO_ROOM, videoRoom };
@@ -103,6 +101,26 @@ export function setVideoRoom(videoRoom) {
 const SET_VIDEO_PARTICIPANTS = 'SET_VIDEO_PARTICIPANTS';
 export function setVideoParticipants(videoRoomParticipants) {
   return { type: SET_VIDEO_PARTICIPANTS, videoRoomParticipants };
+}
+
+export const SET_CHAT_ROOM = 'SET_CHAT_ROOM';
+export function setChatRoom(chatRoom) {
+  return { type: SET_CHAT_ROOM, chatRoom };
+}
+
+export const SET_CHAT_ROOM_PARTICIPANTS = 'SET_CHAT_ROOM_PARTICIPANTS';
+export function setChatRoomParticipants(chatRoomParticipants) {
+  return { type: SET_CHAT_ROOM_PARTICIPANTS, chatRoomParticipants };
+}
+
+export const SET_VIEWING_CHAT_ROOMS = 'SET_VIEWING_CHAT_ROOMS';
+export function setViewingChatRooms(isViewingChatRooms) {
+  return { type: SET_VIEWING_CHAT_ROOMS, isViewingChatRooms };
+}
+
+export const SET_VIEWING_DIRECT_MESSAGES = 'SET_VIEWING_DIRECT_MESSAGES';
+export function setViewingDirectMessages(isViewingDirectMessages) {
+  return { type: SET_VIEWING_DIRECT_MESSAGES, isViewingDirectMessages };
 }
 
 function gizmoReducer(state, action) {
@@ -114,6 +132,7 @@ function gizmoReducer(state, action) {
         ...state,
         mediaStream,
         isVideoChatConnected: true,
+        videoRoom: state.activeCampaign ? state.activeCampaign.videoRooms[0].title : null,
       };
 
     case DISCONNECT_VIDEO_CHAT:
@@ -168,19 +187,18 @@ function gizmoReducer(state, action) {
       return {
         ...state,
         isOpen,
-        isVideoChatConnected: isOpen ? state.isVideoChatConnected : false,
-        isCameraDisabled: isOpen ? state.isCameraDisabled : true,
-        isMicrophoneMuted: isOpen ? state.isMicrophoneMuted : true,
-        isViewingVideoRooms: isOpen ? state.isViewingVideoRooms : false,
+        isVideoChatConnected: false,
+        isCameraDisabled: true,
+        isMicrophoneMuted: true,
+        isViewingVideoRooms: false,
+        isViewingChatRooms: false,
+        isViewingVideoRooms: false,
+        isViewingDirectMessages: false,
       };
 
     case SET_SOCKET:
       const { socket } = action;
       return { ...state, socket };
-
-    case SET_SOCKET_DISCONNECTED:
-      const { hasSocketDisconnected } = action;
-      return { ...state, hasSocketDisconnected };
 
     case SET_STICK:
       const { isStick } = action;
@@ -188,7 +206,13 @@ function gizmoReducer(state, action) {
 
     case SET_VIEWING_VIDEO_ROOMS:
       const { isViewingVideoRooms } = action;
-      return { ...state, isViewingVideoRooms };
+
+      return {
+        ...state,
+        isViewingVideoRooms,
+        isViewingChatRooms: false,
+        isViewingDirectMessages: false,
+      };
 
     case SET_VIDEO_ROOM:
       const { videoRoom } = action;
@@ -202,6 +226,39 @@ function gizmoReducer(state, action) {
     case SET_VIDEO_PARTICIPANTS:
       const { videoRoomParticipants } = action;
       return { ...state, videoRoomParticipants };
+
+    case SET_CHAT_ROOM:
+      const { chatRoom } = action;
+
+      return {
+        ...state,
+        chatRoom,
+        chatRoomParticipants: [],
+      };
+
+    case SET_CHAT_ROOM_PARTICIPANTS:
+      const { chatRoomParticipants } = action;
+      return { ...state, chatRoomParticipants };
+
+    case SET_VIEWING_CHAT_ROOMS:
+      const { isViewingChatRooms } = action;
+
+      return {
+        ...state,
+        isViewingChatRooms,
+        isViewingVideoRooms: false,
+        isViewingDirectMessages: false,
+      };
+
+    case SET_VIEWING_DIRECT_MESSAGES:
+      const { isViewingDirectMessages } = action;
+
+      return {
+        ...state,
+        isViewingDirectMessages,
+        isViewingVideoRooms: false,
+        isViewingChatRooms: false,
+      };
 
     default:
       return state;
@@ -262,8 +319,8 @@ export default function GizmoController(props) {
       });
 
       connection.on('disconnect', () => {
-        dispatch(setSocketDisconnected(true));
-        pushSnackError(dispatchApplication, 'Disconnected from chat server, attempting reconnection...');
+        dispatch(setIsGizmoOpen(false));
+        pushSnackError(dispatchApplication, 'Disconnected from organizing hub server, attempting reconnection...');
       });
 
       return () => {
@@ -284,7 +341,6 @@ export default function GizmoController(props) {
       state.socket.emit('join-campaign', activeCampaign.id);
 
       function onConnect() {
-        dispatch(setSocketDisconnected(false));
         state.socket.emit('join-campaign', activeCampaign.id);
       }
 
@@ -323,6 +379,22 @@ export default function GizmoController(props) {
     state.socket,
     state.isVideoChatConnected,
     state.isOpen,
+  ]);
+
+  React.useEffect(() => {
+    if (!state.socket) {
+      return;
+    }
+
+    function onSync(chatRoomParticipants, trace) {
+      dispatch(setChatRoomParticipants(chatRoomParticipants));
+    }
+
+    state.socket.on('chat-participants-sync', onSync);
+    return () => state.socket.removeListener('chat-participants-sync', onSync);
+  }, [
+    dispatch,
+    state.socket,
   ]);
 
   return (

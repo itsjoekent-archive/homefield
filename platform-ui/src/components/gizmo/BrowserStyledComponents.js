@@ -108,6 +108,26 @@ export const BrowserCardDescription = styled.p`
   text-align: left;
 `;
 
+export const BrowserCardStatus = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+
+  background-color: ${({ theme }) => theme.colors.blue.base};
+
+  border-bottom-left-radius: ${({ theme }) => theme.borderRadius};
+  border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
+
+  padding: 8px;
+`;
+
+export const BrowserCardStatusLabel = styled.p`
+  font-family: ${({ theme }) => theme.font};
+  font-size: 14px;
+  font-weight: ${({ theme }) => theme.type.weight.label};
+  color: ${({ theme }) => theme.colors.mono.white};
+`;
+
 export const BrowserCard = styled.button`
   display: block;
   margin-bottom: 24px;
@@ -133,25 +153,16 @@ export const BrowserCard = styled.button`
     ${BrowserCardTitle}, ${BrowserCardDescription} {
       color: ${({ theme }) => theme.colors.mono.white};
     }
+
+    ${BrowserCardStatus} {
+      background-color: ${({ theme }) => theme.colors.purple.base};
+    }
   `}
 `;
 
-export const BrowserCardStatus = styled.div`
+export const BrowserCardLayout =  styled.div`
   display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
+  flex-direction: column;
 
-  background-color: ${({ theme }) => theme.colors.purple.base};
-
-  border-bottom-left-radius: ${({ theme }) => theme.borderRadius};
-  border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
-
-  padding: 8px;
-`;
-
-export const BrowserCardStatusLabel = styled.p`
-  font-family: ${({ theme }) => theme.font};
-  font-size: 14px;
-  font-weight: ${({ theme }) => theme.type.weight.label};
-  color: ${({ theme }) => theme.colors.mono.white};
+  padding: 12px;
 `;

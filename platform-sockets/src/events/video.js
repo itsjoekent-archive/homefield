@@ -46,11 +46,11 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
       throw new SocketError('No campaign specified for video chat');
     }
 
-    if (socket.activeRoom) {
-      await removeFromRoom(socket.activeRoom, socket);
+    if (socket.activeVideoRoom) {
+      await removeFromRoom(socket.activeVideoRoom, socket);
     }
 
-    socket.activeRoom = room;
+    socket.activeVideoRoom = room;
     logger.debug(`account ${socket.account._id} joined ${room} in ${socket.activeCampaign}`);
 
     const value = JSON.stringify({
@@ -77,11 +77,11 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
       return;
     }
 
-    if (!socket.activeRoom) {
+    if (!socket.activeVideoRoom) {
       return;
     }
 
-    await removeFromRoom(socket.activeRoom, socket);
+    await removeFromRoom(socket.activeVideoRoom, socket);
   }
 
   socket.on('leave-video-room', wrapAsyncFunction(onVideoRoomLeave, socketErrorHandler(socket, logger)));
@@ -107,13 +107,13 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
       throw new SocketError('No campaign specified for video chat');
     }
 
-    if (!socket.activeRoom) {
+    if (!socket.activeVideoRoom) {
       throw new SocketError('Cannot push video update when not connected to a room');
     }
 
     const accountId = socket.account._id.toString();
 
-    const hashKey = makeRoomHashKey(socket, socket.activeRoom);
+    const hashKey = makeRoomHashKey(socket, socket.activeVideoRoom);
     const record = await hashGet(hashKey, accountId);
 
     const value = JSON.stringify({
@@ -124,13 +124,13 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
     });
 
     await hashSet(hashKey, accountId, value);
-    await sync(hashKey, socket, socket.activeRoom);
+    await sync(hashKey, socket, socket.activeVideoRoom);
   }
 
   socket.on('video-room-status-update', wrapAsyncFunction(onVideoStatusUpdate, socketErrorHandler(socket, logger)));
 
   async function onDisconnect() {
-    if (socket.account && socket.activeCampaign && socket.activeRoom) {
+    if (socket.account && socket.activeCampaign && socket.activeVideoRoom) {
       await onVideoRoomLeave();
     }
   }

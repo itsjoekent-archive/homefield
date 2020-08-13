@@ -87,6 +87,19 @@ export const BlueButton = styled(Button)`
   ${({ loading }) => loading === 'true' && disabledStyles}
 `;
 
+export const PurpleButton = styled(Button)`
+  color: ${({ theme }) => theme.colors.mono.white};
+  background-color: ${({ theme }) => theme.colors.purple.base};
+
+  ${({ loading }) => (!loading || !JSON.parse(loading)) && css`
+    &:hover {
+      background-color: ${({ theme }) => theme.colors.purple.darkest};
+    }
+  `}
+
+  ${({ loading }) => loading === 'true' && disabledStyles}
+`;
+
 export const BlueButtonInverted = styled(Button)`
   color: ${({ theme }) => theme.colors.blue.base};
   background-color: ${({ theme }) => theme.colors.mono.white};

@@ -14,12 +14,18 @@ import {
 } from 'components/gizmo/BrowserStyledComponents';
 import {
   useGizmoController,
-  setViewingVideoRooms,
-  setVideoRoom,
+  setViewingChatRooms,
+  setChatRoom,
 } from 'components/gizmo/GizmoController';
 
-export default function VideoRoomBrowser() {
-  const { activeCampaign, videoRoom, socket, dispatch } = useGizmoController();
+export default function ChatRoomBrowser() {
+  const {
+    activeCampaign,
+    dispatch,
+    socket,
+    chatRoom,
+  } = useGizmoController();
+
   const [roomData, setRoomData] = React.useState(null);
 
   React.useEffect(() => {
@@ -31,10 +37,10 @@ export default function VideoRoomBrowser() {
       setRoomData(data);
     }
 
-    socket.on('all-video-rooms-data', onData);
-    socket.emit('all-video-rooms');
+    socket.on('all-chat-room-counts', onData);
+    socket.emit('get-all-chat-room-counts');
 
-    return () => socket.removeListener('all-video-rooms-data', onData);
+    return () => socket.removeListener('all-chat-room-counts', onData);
   }, [
     socket,
     roomData,
@@ -42,11 +48,11 @@ export default function VideoRoomBrowser() {
   ]);
 
   function onClose() {
-    dispatch(setViewingVideoRooms(false))
+    dispatch(setViewingChatRooms(false));
   }
 
   function onSelect(title) {
-    dispatch(setVideoRoom(title));
+    dispatch(setChatRoom(title));
     onClose();
   }
 
@@ -55,21 +61,21 @@ export default function VideoRoomBrowser() {
       return;
     }
 
-    return (roomData[title] || []).length;
+    return roomData[title] || 0;
   }
 
   return (
     <BrowserList>
       <TitleRow>
-        <Title>Browse video rooms</Title>
+        <Title>Browse chat channels</Title>
         <CloseButton onClick={onClose}>
           Close
         </CloseButton>
       </TitleRow>
-      {activeCampaign && activeCampaign.videoRooms.map((room) => (
+      {activeCampaign && activeCampaign.chatChannels.map((room) => (
         <BrowserCard
           key={room.title}
-          highlight={videoRoom === room.title}
+          highlight={chatRoom === room.title}
           onClick={() => onSelect(room.title)}
         >
           <BrowserCardLayout>

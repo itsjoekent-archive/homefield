@@ -1,6 +1,5 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
-import { useGizmoController } from 'components/gizmo/GizmoController';
 import { ReactComponent as MicrophoneIcon } from 'assets/microphone-icon-white.svg';
 import { ReactComponent as CameraIcon } from 'assets/camera-icon-white.svg';
 import { ReactComponent as SpeakerIcon } from 'assets/speaker-icon-white.svg';
@@ -186,8 +185,6 @@ export default function VideoStream(props) {
     isSpeakerMuted,
     muteAudio = false,
   } = props;
-
-  const { isStick } = useGizmoController();
 
   const videoRef = React.useRef(null);
 

@@ -9,7 +9,10 @@ import ToggleStickModeButton from 'components/gizmo/ToggleStickModeButton';
 import VideoConnectionPrompt from 'components/gizmo/VideoConnectionPrompt';
 import VideoChatRoom from 'components/gizmo/VideoChatRoom';
 import VideoRoomBrowser from 'components/gizmo/VideoRoomBrowser';
+import ChatRoomBrowser from 'components/gizmo/ChatRoomBrowser';
+import ChatHistory from 'components/gizmo/ChatHistory';
 import ChatNavBar from 'components/gizmo/ChatNavBar';
+import ChatSend from 'components/gizmo/ChatSend';
 import { useGizmoController } from 'components/gizmo/GizmoController';
 
 const fadeIn = keyframes`
@@ -93,6 +96,9 @@ const crateCloseFrames = keyframes`
 `;
 
 const Crate = styled.div`
+  display: flex;
+  flex-direction: column;
+
   width: 100%;
   flex-grow: 1;
 
@@ -149,6 +155,8 @@ export default function Popout() {
     isStick,
     isVideoChatConnected,
     isViewingVideoRooms,
+    isViewingChatRooms,
+    isViewingDirectMessages,
   } = useGizmoController();
 
   const [hide, setHide] = React.useState(!isOpen);
@@ -175,6 +183,10 @@ export default function Popout() {
   if (hide) {
     return null;
   }
+
+  const hideChatHistory = isViewingVideoRooms
+    || isViewingChatRooms
+    || isViewingDirectMessages;
 
   return (
     <Container isOpen={isOpen} isStick={isStick}>
@@ -230,8 +242,18 @@ export default function Popout() {
         {isViewingVideoRooms && (
           <VideoRoomBrowser />
         )}
-        {!isViewingVideoRooms && (
-          <ChatNavBar />
+        {isViewingChatRooms && (
+          <ChatRoomBrowser />
+        )}
+        {isViewingDirectMessages && (
+          <React.Fragment />
+        )}
+        {!hideChatHistory && (
+          <React.Fragment>
+            <ChatNavBar />
+            <ChatHistory />
+            <ChatSend />
+          </React.Fragment>
         )}
       </Crate>
     </Container>

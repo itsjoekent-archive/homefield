@@ -114,6 +114,7 @@ const io = socketio();
       require('./events/join-campaign')(eventInitArguments);
       require('./events/rtc')(eventInitArguments);
       require('./events/video')(eventInitArguments);
+      require('./events/chat')(eventInitArguments);
     });
 
     logger.info(`listening on port ${PORT}`);
