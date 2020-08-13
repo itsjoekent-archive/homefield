@@ -1,9 +1,8 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import Tooltip from 'components/Tooltip';
 import {
   useGizmoController,
-  setChatRoomParticipants,
   setViewingChatRooms,
   setViewingDirectMessages,
 } from 'components/gizmo/GizmoController';

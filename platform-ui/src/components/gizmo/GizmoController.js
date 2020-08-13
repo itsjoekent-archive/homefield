@@ -192,7 +192,6 @@ function gizmoReducer(state, action) {
         isMicrophoneMuted: true,
         isViewingVideoRooms: false,
         isViewingChatRooms: false,
-        isViewingVideoRooms: false,
         isViewingDirectMessages: false,
       };
 

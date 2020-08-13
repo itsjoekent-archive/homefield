@@ -86,33 +86,15 @@ const Message = styled.p`
 `;
 
 export default function ChatHistory(props) {
-  const { chatRoom, directMessage, dispatch, socket } = useGizmoController();
+  const { chatRoom, socket } = useGizmoController();
 
   const previousChatRoom = usePrevious(chatRoom);
   const [messages, setMessages] = React.useState([]);
-
-  function reconcileNewMessages(newMessages) {
-    return setMessages((existingMessages) => {
-      const existingMessageIds = existingMessages.reduce((acc, message) => ({
-        ...acc,
-        [message.id]: true,
-      }), {});
-
-      const uniqueNewMessages = newMessages.filter(({ id }) => !existingMessageIds[id]);
-      const allMessages = [...existingMessages, ...uniqueNewMessages];
-
-      return allMessages
-        .filter((message) => message.room === chatRoom)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    });
-  }
 
   React.useEffect(() => {
     if (!socket) {
       return;
     }
-
-    let cancel = false;
 
     if (chatRoom && chatRoom !== previousChatRoom) {
       setMessages([]);
@@ -126,8 +108,20 @@ export default function ChatHistory(props) {
   ]);
 
   React.useEffect(() => {
-    function onIncomingMessages(messages) {
-      reconcileNewMessages(messages);
+    function onIncomingMessages(newMessages) {
+      setMessages((existingMessages) => {
+        const existingMessageIds = existingMessages.reduce((acc, message) => ({
+          ...acc,
+          [message.id]: true,
+        }), {});
+
+        const uniqueNewMessages = newMessages.filter(({ id }) => !existingMessageIds[id]);
+        const allMessages = [...existingMessages, ...uniqueNewMessages];
+
+        return allMessages
+          .filter((message) => message.room === chatRoom)
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      });
     }
 
     socket.on('incoming-chat-messages', onIncomingMessages);
