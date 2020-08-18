@@ -8,18 +8,13 @@ const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 const Campaign = require('../../api/models/Campaign');
 const transformAccount = require('../../api/transformers/transformAccount');
 
-module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
-  const hashSet = promisify(redisPublishClient.hset).bind(redisPublishClient);
-  const hashGet = promisify(redisPublishClient.hget).bind(redisPublishClient);
-  const hashDelete = promisify(redisPublishClient.hdel).bind(redisPublishClient);
-  const hashGetAllValues = promisify(redisPublishClient.hvals).bind(redisPublishClient);
-
+module.exports = ({ io, socket, logger, redisClient, mongoDb }) => {
   function makeRoomHashKey(socket, room) {
     return `${socket.activeCampaign}-video-${room}`;
   }
 
   async function sync(hashKey, socket, room) {
-    const videoRoomParticipantsEncoded = await hashGetAllValues(hashKey);
+    const videoRoomParticipantsEncoded = await redisClient.hvals(hashKey);
     const videoRoomParticipants = videoRoomParticipantsEncoded.map(JSON.parse);
 
     io.in(socket.activeCampaign).emit(`video-${room}-sync`, { videoRoomParticipants });
@@ -27,7 +22,7 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
 
   async function removeFromRoom(room, socket) {
     const removeFromHashKey = makeRoomHashKey(socket, room);
-    await hashDelete(removeFromHashKey, socket.account._id.toString());
+    await redisClient.hdel(removeFromHashKey, socket.account._id.toString());
 
     logger.debug(`account ${socket.account._id} left ${room} in ${socket.activeCampaign}`);
     await sync(removeFromHashKey, socket, room);
@@ -62,7 +57,7 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
     });
 
     const hashKey = makeRoomHashKey(socket, room);
-    await hashSet(hashKey, socket.account._id.toString(), value);
+    await redisClient.hset(hashKey, socket.account._id.toString(), value);
     await sync(hashKey, socket, room);
   }
 
@@ -114,7 +109,7 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
     const accountId = socket.account._id.toString();
 
     const hashKey = makeRoomHashKey(socket, socket.activeVideoRoom);
-    const record = await hashGet(hashKey, accountId);
+    const record = await redisClient.hget(hashKey, accountId);
 
     const value = JSON.stringify({
       ...(JSON.parse(record)),
@@ -123,7 +118,7 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
       isSpeakerMuted,
     });
 
-    await hashSet(hashKey, accountId, value);
+    await redisClient.hset(hashKey, accountId, value);
     await sync(hashKey, socket, socket.activeVideoRoom);
   }
 
@@ -153,7 +148,7 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
 
     const roomsEncoded = await Promise.all(roomNames.map((title) => {
       const hashKey = makeRoomHashKey(socket, title);
-      return hashGetAllValues(hashKey);
+      return redisClient.hvals(hashKey);
     }));
 
     const data = roomsEncoded.reduce((acc, participants, index) => ({

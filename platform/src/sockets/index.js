@@ -4,6 +4,7 @@ const mongo = require('mongodb');
 const socketio = require('socket.io');
 const redisAdapter = require('socket.io-redis');
 const redis = require('redis');
+const asyncRedis = require('async-redis');
 const pino = require('pino');
 
 const traceError = require('./utils/traceError');
@@ -27,10 +28,7 @@ const io = socketio();
 
     const redisPublishClient = redis.createClient({ url: REDIS_URL });
     const redisSubscribeClient = redis.createClient({ url: REDIS_URL });
-
-    const setRedisValue = promisify(redisPublishClient.set).bind(redisPublishClient);
-    const getRedisValue = promisify(redisPublishClient.get).bind(redisPublishClient);
-    const deleteRedisValue = promisify(redisPublishClient.del).bind(redisPublishClient);
+    const redisClient = asyncRedis.createClient({ url: REDIS_URL });
 
     io.adapter(redisAdapter({ pubClient: redisPublishClient, subClient: redisSubscribeClient }));
 
@@ -39,6 +37,10 @@ const io = socketio();
     });
 
     redisSubscribeClient.on('error', (error) => {
+      logger.error(error);
+    });
+
+    redisClient.on('error', (error) => {
       logger.error(error);
     });
 
@@ -73,7 +75,7 @@ const io = socketio();
 
         const socketKey = `account-socket-${account._id.toString()}`;
 
-        const existingSocketId = await getRedisValue(socketKey);
+        const existingSocketId = await redisClient.get(socketKey);
         if (existingSocketId) {
           const remoteDisconnect = promisify(io.of('/').adapter.remoteDisconnect);
 
@@ -82,7 +84,7 @@ const io = socketio();
           } catch (error) {}
         }
 
-        await setRedisValue(socketKey, socket.id);
+        await redisClient.set(socketKey, socket.id);
 
         return next();
       } catch (error) {
@@ -102,13 +104,12 @@ const io = socketio();
         socket,
         logger,
         mongoDb,
-        redisPublishClient,
-        redisSubscribeClient,
+        redisClient,
       };
 
       socket.on('disconnect', async function() {
         logger.debug(`socket disconnected, socket-id=${socket.id} ip=${socket.handshake.address} account-id=${socket.account._id.toString()}`);
-        await deleteRedisValue(`account-socket-${socket.account._id.toString()}`);
+        await redisClient.del(`account-socket-${socket.account._id.toString()}`);
       });
 
       require('./events/join-campaign')(eventInitArguments);

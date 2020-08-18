@@ -10,13 +10,9 @@ const ChatMessage = require('../../api/models/ChatMessage');
 const transformAccount = require('../../api/transformers/transformAccount');
 const transformChatMessage = require('../../api/transformers/transformChatMessage');
 
-module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
-  const hashSet = promisify(redisPublishClient.hset).bind(redisPublishClient);
-  const hashDelete = promisify(redisPublishClient.hdel).bind(redisPublishClient);
-  const hashGetAllValues = promisify(redisPublishClient.hvals).bind(redisPublishClient);
-
+module.exports = ({ io, socket, logger, redisClient, mongoDb }) => {
   async function sync() {
-    const chatRoomParticipantsEncoded = await hashGetAllValues(socket.activeChatRoom);
+    const chatRoomParticipantsEncoded = await redisClient.hvals(socket.activeChatRoom);
     const chatRoomParticipants = chatRoomParticipantsEncoded.map(JSON.parse);
 
     io.in(socket.activeChatRoom).emit('chat-participants-sync', chatRoomParticipants);
@@ -36,7 +32,7 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
     }
 
     if (socket.activeChatRoom) {
-      await hashDelete(socket.activeChatRoom, socket.account._id.toString());
+      await redisClient.hdel(socket.activeChatRoom, socket.account._id.toString());
 
       socket.leave(socket.activeChatRoom);
 
@@ -52,7 +48,7 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
     socket.join(socket.activeChatRoom);
 
     const value = JSON.stringify(transformAccount(socket.account, null));
-    const output = await hashSet(socket.activeChatRoom, socket.account._id.toString(), value);
+    const output = await redisClient.hset(socket.activeChatRoom, socket.account._id.toString(), value);
 
     await sync();
 
@@ -109,7 +105,7 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
 
   async function onDisconnect() {
     if (socket.account && socket.activeCampaign && socket.activeChatRoom) {
-      await hashDelete(socket.activeChatRoom, socket.account._id.toString());
+      await redisClient.hdel(socket.activeChatRoom, socket.account._id.toString());
       await sync();
     }
   }
@@ -132,7 +128,7 @@ module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
 
     const roomsEncoded = await Promise.all(roomNames.map((title) => {
       const hashKey = `${socket.activeCampaign}-chat-${title}`;
-      return hashGetAllValues(hashKey);
+      return redisClient.hvals(hashKey);
     }));
 
     const data = roomsEncoded.reduce((acc, participants, index) => ({

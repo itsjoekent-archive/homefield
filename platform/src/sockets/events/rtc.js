@@ -4,10 +4,7 @@ const SocketError = require('../utils/socketError');
 const socketErrorHandler = require('../utils/socketErrorHandler');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 
-module.exports = ({ io, socket, logger, redisPublishClient }) => {
-  const get = promisify(redisPublishClient.get).bind(redisPublishClient);
-  const hashGetAllValues = promisify(redisPublishClient.hvals).bind(redisPublishClient);
-
+module.exports = ({ io, socket, logger, redisClient }) => {
   async function standardRtcValidation(accountId) {
     if (!accountId) {
       throw new SocketError('Missing account id');
@@ -25,14 +22,14 @@ module.exports = ({ io, socket, logger, redisPublishClient }) => {
       throw new SocketError('Not connected to a video room');
     }
 
-    const videoRoomParticipantsEncoded = await hashGetAllValues(`${socket.activeCampaign}-video-${socket.activeVideoRoom}`);
+    const videoRoomParticipantsEncoded = await redisClient.hvals(`${socket.activeCampaign}-video-${socket.activeVideoRoom}`);
     const videoRoomParticipants = videoRoomParticipantsEncoded.map(JSON.parse);
 
     if (!videoRoomParticipants.find((participant) => participant.id === accountId)) {
       throw new SocketError('Attempted to connect with an account that is not in this video room');
     }
 
-    const targetSocketId = await get(`account-socket-${accountId}`);
+    const targetSocketId = await redisClient.get(`account-socket-${accountId}`);
     if (!targetSocketId) {
       throw new SocketError('Attempted to connect with an account that is not online');
     }
