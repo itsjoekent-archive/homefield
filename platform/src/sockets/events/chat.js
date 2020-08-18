@@ -5,10 +5,10 @@ const SocketError = require('../utils/socketError');
 const socketErrorHandler = require('../utils/socketErrorHandler');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 
-const Campaign = require('../../lib/models/Campaign');
-const ChatMessage = require('../../lib/models/ChatMessage');
-const transformAccount = require('../../lib/transformers/transformAccount');
-const transformChatMessage = require('../../lib/transformers/transformChatMessage');
+const Campaign = require('../../api/models/Campaign');
+const ChatMessage = require('../../api/models/ChatMessage');
+const transformAccount = require('../../api/transformers/transformAccount');
+const transformChatMessage = require('../../api/transformers/transformChatMessage');
 
 module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
   const hashSet = promisify(redisPublishClient.hset).bind(redisPublishClient);

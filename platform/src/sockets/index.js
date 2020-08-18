@@ -8,8 +8,8 @@ const pino = require('pino');
 
 const traceError = require('./utils/traceError');
 
-const Account = require('../lib/models/Account');
-const Token = require('../lib/models/Token');
+const Account = require('../api/models/Account');
+const Token = require('../api/models/Token');
 
 const logger = pino({ name: 'platform-sockets', level: process.env.LOG_LEVEL });
 const io = socketio();

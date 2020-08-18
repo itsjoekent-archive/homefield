@@ -1,9 +1,9 @@
 const { MongoClient } = require('mongodb');
 
-const setupDb = require('../src/setupDb');
-const Account = require('../src/models/Account');
-const Activity = require('../src/models/Activity');
-const Campaign = require('../src/models/Campaign');
+const setupDb = require('../src/api/setupDb');
+const Account = require('../src/api/models/Account');
+const Activity = require('../src/api/models/Activity');
+const Campaign = require('../src/api/models/Campaign');
 
 const seedWiki = require('./seed-wiki');
 

@@ -4,7 +4,7 @@ const SocketError = require('../utils/socketError');
 const socketErrorHandler = require('../utils/socketErrorHandler');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 
-const Campaign = require('../../lib/models/Campaign');
+const Campaign = require('../../api/models/Campaign');
 
 module.exports = ({ socket, logger, mongoDb, redisClient }) => {
   async function onJoinCampaign(campaignId) {

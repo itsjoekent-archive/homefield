@@ -5,8 +5,8 @@ const SocketError = require('../utils/socketError');
 const socketErrorHandler = require('../utils/socketErrorHandler');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 
-const Campaign = require('../../lib/models/Campaign');
-const transformAccount = require('../../lib/transformers/transformAccount');
+const Campaign = require('../../api/models/Campaign');
+const transformAccount = require('../../api/transformers/transformAccount');
 
 module.exports = ({ io, socket, logger, redisPublishClient, mongoDb }) => {
   const hashSet = promisify(redisPublishClient.hset).bind(redisPublishClient);
