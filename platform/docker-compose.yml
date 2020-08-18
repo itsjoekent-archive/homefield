@@ -31,7 +31,6 @@ services:
       - "5001:5001"
     volumes:
       - ./src:/usr/src/app/src:cached
-      - ./bin:/usr/src/app/bin:cached
     environment:
       - PORT=5001
       - LOG_LEVEL=debug

@@ -15,6 +15,8 @@ const Token = require('../api/models/Token');
 const logger = pino({ name: 'platform-sockets', level: process.env.LOG_LEVEL });
 const io = socketio();
 
+io.set('origins', '*:*');
+
 (async function() {
   try {
     const { MONGODB_URL, REDIS_URL, PORT } = process.env;
