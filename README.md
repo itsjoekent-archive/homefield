@@ -9,9 +9,14 @@ To run a specific application follow the README for that project.
 
 ### Deploying
 
-To deploy a new version or interact with a remote application from your machine, you'll need the [AWS CLI v2 installed](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html). Once installed authenticate by running the following,
+To deploy a new version or interact with a remote API from your machine, you'll need the [Heroku CLI installed](https://devcenter.heroku.com/articles/heroku-cli#download-and-install). Once installed authenticate by running the following,
 
 ```sh
-$ aws --version # Confirm you're version is 2.0.0 or greater
-$ aws configure
+$ heroku login
+```
+
+To deploy the frontend UI, you'll need the [Wrangler CLI installed](https://developers.cloudflare.com/workers/tooling/wrangler/install/). After you have installed Wrangler, you'll need to configure Wrangler by running the following,
+
+```sh
+$ wrangler config
 ```

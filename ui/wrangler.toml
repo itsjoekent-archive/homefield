@@ -1,0 +1,9 @@
+name = "homefield-ui"
+type = "webpack"
+account_id = "463d7b6db0921e7fa45a3a78e62b7f00"
+route = "dev-app.homefieldorganizing.com/*"
+zone_id = "d713d7c2cd419d4f637ab02f63d61ba5"
+
+[site]
+bucket = "./build"
+entry-point = "."

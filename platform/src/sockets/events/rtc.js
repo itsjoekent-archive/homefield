@@ -1,6 +1,6 @@
 const { promisify } = require('util');
 
-const SocketError = require('../utils/socketError');
+const SocketError = require('../utils/SocketError');
 const socketErrorHandler = require('../utils/socketErrorHandler');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 
