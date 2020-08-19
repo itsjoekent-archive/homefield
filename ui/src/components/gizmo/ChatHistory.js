@@ -135,7 +135,7 @@ export default function ChatHistory(props) {
     const createdAt = new Date(message.createdAt);
 
     if (Math.abs(Date.now() - createdAt) / 36e5 > 24) {
-      return ago(message.createdAt);
+      return ago(createdAt);
     }
 
     const minutes = createdAt.getMinutes();
