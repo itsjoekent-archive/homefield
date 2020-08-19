@@ -134,8 +134,6 @@ export default function VideoStreamList() {
   const { joinedRoomAt } = videoRoomParticipants
     .find((participant) => participant.id === account.id) || {};
 
-  console.log('VideoChatRoom rendering');
-
   return (
     <Container isStick={isStick}>
       <LocalVideoStream />
