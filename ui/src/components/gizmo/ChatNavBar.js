@@ -12,6 +12,7 @@ import { ReactComponent as DirectMessageIcon } from 'assets/direct-message-brows
 const Container = styled.div`
   display: flex;
   flex-direction: row;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
 

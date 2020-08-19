@@ -4,6 +4,7 @@ const SocketError = require('../utils/SocketError');
 const socketErrorHandler = require('../utils/socketErrorHandler');
 const wrapAsyncFunction = require('../utils/wrapAsyncFunction');
 
+const Account = require('../../api/models/Account');
 const Campaign = require('../../api/models/Campaign');
 
 module.exports = ({ socket, logger, mongoDb, redisClient }) => {
@@ -15,6 +16,10 @@ module.exports = ({ socket, logger, mongoDb, redisClient }) => {
     if (!socket.account) {
       throw new SocketError('Not authenticated');
     }
+
+    // Fetch most up-to-date campaign list before doing validation
+    const account = await Account(mongoDb).getAccountById(socket.account._id);
+    socket.account = account;
 
     if (!socket.account.campaigns.map((id) => id.toString()).includes(campaignId)) {
       throw new SocketError('Cannot join chat room for a campaign you\'re not volunteering for');

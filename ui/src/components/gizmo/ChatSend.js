@@ -6,6 +6,7 @@ import { useGizmoController } from 'components/gizmo/GizmoController';
 
 const Container = styled.div`
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
 
   padding: 12px;

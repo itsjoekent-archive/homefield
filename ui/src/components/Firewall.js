@@ -121,7 +121,7 @@ export default function Firewall(props) {
         <Content>
           <Header>Due to FEC Regulations, we can’t let you volunteer for this campaign.</Header>
           <Paragraph>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</Paragraph>
-          <Paragraph>{errorMessage}</Paragraph>
+          <Paragraph><strong>{errorMessage}.</strong></Paragraph>
           <ButtonRow>
             <CancelButtonInverted onClick={onClose}>Cancel</CancelButtonInverted>
             <EditButton>

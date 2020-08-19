@@ -21,6 +21,7 @@ const Container = styled.div`
 const ChatMessageRow = styled.div`
   display: flex;
   flex-direction: row;
+  flex-shrink: 0;
   align-items: flex-start;
 
   margin-bottom: 12px;
