@@ -1,4 +1,4 @@
-import { getAssetFromKV, mapRequestToAsset } from '@cloudflare/kv-asset-handler';
+import { getAssetFromKV, serveSinglePageApp } from '@cloudflare/kv-asset-handler';
 
 const DEBUG = process.env.NODE_ENV === 'production' ? false : true;
 
@@ -33,14 +33,8 @@ async function handleEvent(event) {
       };
     }
 
-    return await getAssetFromKV(event, options);
-  } catch (assetError) {
-    try {
-      return await getAssetFromKV(event, {
-        mapRequestToAsset: (request) => new Reqest(`${new URL(req.url).origin}/index.html`, request),
-      });
-    } catch (indexError) {
-      return makeErrorResponse(indexError);
-    }
+    return await getAssetFromKV(event, { ...options, mapRequestToAsset: serveSinglePageApp });
+  } catch (error) {
+    return makeErrorResponse(error);
   }
 }
