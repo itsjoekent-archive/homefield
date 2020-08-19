@@ -6,6 +6,7 @@ import { useApplicationContext, pushSnackError } from 'ApplicationContext';
 
 const Container = styled.div`
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
   align-items: center;
 

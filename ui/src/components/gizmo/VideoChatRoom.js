@@ -9,6 +9,7 @@ import { useApplicationContext } from 'ApplicationContext';
 
 const Container = styled.div`
   display: flex;
+  flex-shrink: 0;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
@@ -132,6 +133,8 @@ export default function VideoStreamList() {
 
   const { joinedRoomAt } = videoRoomParticipants
     .find((participant) => participant.id === account.id) || {};
+
+  console.log('VideoChatRoom rendering');
 
   return (
     <Container isStick={isStick}>

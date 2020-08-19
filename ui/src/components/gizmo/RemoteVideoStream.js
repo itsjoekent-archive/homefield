@@ -29,8 +29,6 @@ export default function RemoteVideoStream(props) {
     },
   } = props;
 
-  const previousId = usePrevious(id);
-
   const {
     mediaStream,
     socket,
@@ -38,12 +36,16 @@ export default function RemoteVideoStream(props) {
     isSpeakerMuted: isLocalMuted,
   } = useGizmoController();
 
+  const previousId = usePrevious(id);
+
   const [isPeerConntected, setIsPeerConntected] = React.useState(false);
 
   const hasMadeOffer = React.useRef(false);
 
   const peerConnection = React.useRef(constructRTCPeerConnection(mediaStream));
   const peerMediaStream = React.useRef(new MediaStream());
+
+  const socketDependency = socket && socket.id;
 
   React.useEffect(() => {
     return () => peerConnection.current.close();
@@ -96,10 +98,11 @@ export default function RemoteVideoStream(props) {
     return () => {
       peerConnection.current.removeEventListener('icecandidate', onIceCandidate);
       socket.removeListener(remoteIceCandidateEvent, onRemoteIceCandidate);
-    }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     id,
-    socket,
+    socketDependency,
   ]);
 
   React.useEffect(() => {
@@ -107,19 +110,26 @@ export default function RemoteVideoStream(props) {
       return;
     }
 
-    async function makeOffer() {
-      const offer = await peerConnection.current.createOffer();
-      await peerConnection.current.setLocalDescription(offer);
-      socket.emit(`rtc-offer-sent`, id, offer);
+    function makeOffer() {
+      // Make sure the "join video room" evenet is emitted first...
+      const timeoutId = setTimeout(async () => {
+        const offer = await peerConnection.current.createOffer();
+        await peerConnection.current.setLocalDescription(offer);
+
+        socket.emit(`rtc-offer-sent`, id, offer);
+      }, [100]);
+
+      return () => clearTimeout(timeoutId);
     }
 
-    if (localJoinedRoomAt > joinedRoomAt && !hasMadeOffer.current) {
+    if (localJoinedRoomAt < joinedRoomAt && !hasMadeOffer.current) {
       hasMadeOffer.current = true;
-      makeOffer();
+      return makeOffer();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     id,
-    socket,
+    socketDependency,
     videoRoom,
     joinedRoomAt,
     localJoinedRoomAt,
@@ -127,16 +137,24 @@ export default function RemoteVideoStream(props) {
 
   React.useEffect(() => {
     async function onAnswer(answer) {
-      await peerConnection.current.setRemoteDescription(answer);
+      try {
+        await peerConnection.current.setRemoteDescription(answer);
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     async function onOffer(offer) {
-      await peerConnection.current.setRemoteDescription(offer);
+      try {
+        await peerConnection.current.setRemoteDescription(offer);
 
-      const answer = await peerConnection.current.createAnswer();
-      await peerConnection.current.setLocalDescription(answer);
+        const answer = await peerConnection.current.createAnswer();
+        await peerConnection.current.setLocalDescription(answer);
 
-      socket.emit(`rtc-answer-sent`, id, answer);
+        socket.emit(`rtc-answer-sent`, id, answer);
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     const answerEvent = `rtc-answer-from-${id}`;
@@ -148,10 +166,11 @@ export default function RemoteVideoStream(props) {
     return () => {
       socket.removeListener(answerEvent, onAnswer);
       socket.removeListener(offerEvent, onOffer);
-    }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     id,
-    socket,
+    socketDependency,
   ]);
 
   React.useEffect(() => {
