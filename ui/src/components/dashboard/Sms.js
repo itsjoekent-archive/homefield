@@ -29,7 +29,7 @@ export default function Sms(props) {
         isPartying={isPartying}
         setIsPartying={setIsPartying}
       />
-      <Frame src={!!campaign && !!account && campaign.dialer.sms} />
+      <Frame src={!!campaign && !!account && campaign.sms.iframe} />
     </Container>
   );
 }
