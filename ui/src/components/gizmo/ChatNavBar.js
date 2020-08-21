@@ -145,7 +145,7 @@ export default function ChatNavBar() {
           <NavButtonLabel>Chat Channels</NavButtonLabel>
           <ChannelIcon />
         </NavButton>
-        <NavButton onClick={() => dispatch(setViewingDirectMessages(true))}>
+        <NavButton onClick={() => dispatch(setViewingDirectMessages(false))}>
           <NavButtonLabel>Direct Messages</NavButtonLabel>
           <DirectMessageIcon />
         </NavButton>
