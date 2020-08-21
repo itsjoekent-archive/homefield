@@ -243,7 +243,7 @@ export default function DashboardPage(props) {
 
   return (
     <React.Fragment>
-      {!!account && <GizmoController activeCampaign={activeCampaign} />}
+      {!!account && !!activeCampaign && <GizmoController activeCampaign={activeCampaign} />}
       <PageContainer>
         {!!account && !accountHasCampaigns && (
           <OnboardingFlow />
