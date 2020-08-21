@@ -91,7 +91,7 @@ const seedWiki = require('./seed-wiki');
       {
         '$set': {
           dialer: {
-            iframe: 'http://thrutalk.io/caller/login/iframe/vfh2020nc',
+            iframe: 'https://pd.intercloud9.com/test',
           },
           sms: {
             iframe: 'https://homefield-spoke-dev.herokuapp.com/1db1ee86-9984-4e9f-821e-4f49284dd448/join',
